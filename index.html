@@ -1,253 +1,290 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Agua de Mar · Beachwear Costa Rica</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agua de Mar · Beachwear Costa Rica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body>
 
-<!-- ================= HEADER ================= -->
-<header id="header">
-  <div class="container bar">
-    <a href="#top" class="brand">
-      <span class="brand-marks">
-        <img src="assets/logo-mark-cream.png" alt="" class="brand-mark mark-light" />
-        <img src="assets/logo-mark-ink.png" alt="Agua de Mar" class="brand-mark mark-dark" />
-      </span>
-      <span class="brand-word">Agua de Mar</span>
+  <!-- ================= HEADER ================= -->
+  <header id="header">
+    <div class="container bar">
+      <a href="#top" class="brand">
+        <span class="brand-marks">
+          <img src="assets/logo-mark-cream.png" alt="" class="brand-mark mark-light" />
+          <img src="assets/logo-mark-ink.png" alt="Agua de Mar" class="brand-mark mark-dark" />
+        </span>
+        <span class="brand-word">Agua de Mar</span>
+      </a>
+      <nav class="main">
+        <a href="#filosofia">Filosofía</a>
+        <a href="#catalogo">Colección</a>
+        <a href="#clientas">Clientas</a>
+        <a href="#faq">Preguntas</a>
+      </nav>
+      <div class="head-right">
+        <button class="cart-btn" id="cartOpen" aria-label="Abrir carrito">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.4">
+            <path d="M6 7h12l-1 13H7L6 7z" />
+            <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+          </svg>
+          <span class="count" id="cartCount">0</span>
+        </button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menú">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mnav" id="mnav">
+    <a href="#filosofia">Filosofía</a>
+    <a href="#catalogo">Colección</a>
+    <a href="#clientas">Clientas</a>
+    <a href="#faq">Preguntas</a>
+  </div>
+
+  <span id="top"></span>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="hero-media">
+      <div class="ph">
+        <div class="ph-note">
+          <span class="tag">Video · Hero</span>
+          modelo <br>ejemplo
+        </div>
+      </div>
+    </div>
+    <div class="play-pill">
+      <span class="ring"></span>
+    </div>
+    <div class="container hero-inner">
+      <img src="assets/logo-mark-cream.png" alt="" class="hero-mark reveal" />
+      <h1>Agua de Mar</h1>
+      <p class="sub">Trajes de baño hechos para durar. Pensados para el mar de Costa Rica.</p>
+      <div class="cta-row">
+        <a href="#catalogo" class="btn btn-outline">Ver colección<span class="btn-ico"><svg aria-hidden="true"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M7 17 17 7M9 7h8v8" />
+            </svg></span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FILOSOFÍA ================= -->
+  <section class="block" id="filosofia">
+    <div class="container philo">
+      <div class="copy reveal">
+        <p class="eyebrow">Nuestra filosofía</p>
+        <h2>Empezamos con un bikini.</h2>
+        <p>La misma calidad que marcas que cuestan el doble. Telas resistentes al cloro y al agua salada, costuras que
+          aguantan estación tras estación.</p>
+        <p>Hecho en Costa Rica, pensado para el mar. Sin lógica de temporada, sin prisa. Ropa que se queda con vos.</p>
+        <p class="signature">— Hecho a mano en San Carlos</p>
+      </div>
+      <div class="figure ph reveal">
+        <div class="ph-note">
+          <span class="tag">Foto · Filosofía</span>
+          ejemplo / modelo <br>ejemplo
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CATÁLOGO ================= -->
+  <section class="block" id="catalogo">
+    <div class="container">
+      <div class="sec-head reveal">
+        <p class="eyebrow">La colección</p>
+        <h2>Cuarenta piezas, un solo estándar.</h2>
+        <p>Explorá libremente. Cada pieza está pensada para el mar de Costa Rica.</p>
+      </div>
+      <div class="filters reveal" id="filters"></div>
+      <div class="masonry" id="masonry"></div>
+      <p class="catalog-foot" id="catalogFoot"></p>
+    </div>
+  </section>
+
+  <!-- ================= DESTACADA ================= -->
+  <section class="block" id="destacada">
+    <div class="container">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Lo más querido</p>
+        <h2>Colección destacada</h2>
+      </div>
+      <div class="featured" id="featured"></div>
+      <div class="reveal sec-cta">
+        <a href="#catalogo" class="btn btn-ghost">Ver toda la colección<span class="btn-ico"><svg aria-hidden="true"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M7 17 17 7M9 7h8v8" />
+            </svg></span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CLIENTAS ================= -->
+  <section class="block clientas" id="clientas">
+    <div class="container">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Pura vida</p>
+        <h2>Nuestras clientas</h2>
+        <p>Mujeres reales, sus piezas favoritas.</p>
+      </div>
+      <div class="gallery" id="gallery"></div>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section class="block" id="faq">
+    <div class="container">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Lo esencial</p>
+        <h2>Preguntas frecuentes</h2>
+      </div>
+      <div class="faq-wrap reveal" id="faqWrap"></div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="container">
+      <div class="foot-grid">
+        <div>
+          <div class="brand"><img src="assets/logo-mark-cream.png" alt="Agua de Mar" class="foot-mark" /><span
+              class="brand-word">Agua de Mar</span></div>
+          <p class="foot-tag">Beachwear honesto, hecho en Costa Rica para durar más que una temporada.</p>
+        </div>
+        <div class="foot-col">
+          <h4>Contacto</h4>
+          <a href="https://www.instagram.com/aguademarbeachwearcr" data-ig-link target="_blank"
+            rel="noopener">Instagram</a>
+          <a href="https://wa.me/50683425634" data-wa-link target="_blank" rel="noopener">WhatsApp</a>
+          <a href="mailto:hola@aguademar.cr">hola@aguademar.cr</a>
+        </div>
+        <div class="foot-col">
+          <h4>Boletín</h4>
+          <p class="foot-tag tight">Nuevas piezas, sin spam. Una vez al mes.</p>
+          <form class="news" id="news">
+            <input type="email" placeholder="tu correo" required aria-label="Correo" />
+            <button type="submit" aria-label="Suscribirse">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.5">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 Agua de Mar Beachwear CR</span>
+        <span class="pv">Pura vida </span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= CART DRAWER ================= -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Carrito">
+    <div class="drawer-head">
+      <h3>Tu carrito</h3>
+      <button class="icon-btn" id="cartClose" aria-label="Cerrar">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-foot" id="drawerFoot" style="display:none;">
+      <div class="sub-row">
+        <span class="lbl">Subtotal</span>
+        <span class="val" id="subtotal">₡0</span>
+      </div>
+      <p class="ship-note">Envíos a todo el país</p>
+      <button class="btn btn-solid" id="checkout">Finalizar por WhatsApp</button>
+      <p class="wa">Coordinamos pago y envío por mensaje</p>
+    </div>
+  </aside>
+
+  <!-- ================= DETAIL MODAL ================= -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Detalle de producto">
+    <div class="panel">
+      <div class="pimg">
+        <button class="icon-btn pclose" id="modalClose" aria-label="Cerrar">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+        <div class="ph" id="mImg"></div>
+      </div>
+      <div class="pinfo">
+        <p class="eyebrow pcat" id="mCat"></p>
+        <h2 id="mName"></h2>
+        <p class="pprice" id="mPrice"></p>
+        <p class="pdesc" id="mDesc"></p>
+        <p class="plabel">Talla</p>
+        <div class="sizes" id="mSizes"></div>
+        <div class="size-hint" id="mHint">Elegí una talla para continuar</div>
+        <div class="pcare">
+          <span>✓ Resistente al cloro</span>
+          <span>✓ Apta agua salada</span>
+          <span>✓ Hecho en CR</span>
+        </div>
+        <div class="padd">
+          <button class="btn btn-solid" id="mAdd">Agregar al carrito</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M5 12l5 5L20 7" />
+    </svg>
+    <span id="toastMsg">Agregado al carrito</span>
+  </div>
+
+  <!-- ================= BOTONES FLOTANTES ================= -->
+  <div class="fab-stack">
+    <a class="fab fab-ig" data-ig-link href="https://www.instagram.com/aguademarbeachwearcr" target="_blank"
+      rel="noopener" aria-label="Síguenos en Instagram">
+      <span class="fab-tip">Instagram</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none" />
+      </svg>
     </a>
-    <nav class="main">
-      <a href="#filosofia">Filosofía</a>
-      <a href="#catalogo">Colección</a>
-      <a href="#clientas">Clientas</a>
-      <a href="#faq">Preguntas</a>
-    </nav>
-    <div class="head-right">
-      <button class="cart-btn" id="cartOpen" aria-label="Abrir carrito">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
-        <span class="count" id="cartCount">0</span>
-      </button>
-      <button class="menu-toggle" id="menuToggle" aria-label="Menú">
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      </button>
-    </div>
+    <a class="fab fab-wa" data-wa-link href="https://wa.me/50683425634" target="_blank" rel="noopener"
+      aria-label="Escríbenos por WhatsApp">
+      <span class="fab-tip">WhatsApp</span>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path
+          d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35z" />
+        <path
+          d="M12.04 2.5C6.78 2.5 2.5 6.78 2.5 12.04c0 1.68.44 3.32 1.27 4.77L2.5 21.5l4.8-1.26a9.5 9.5 0 0 0 4.74 1.27h.01c5.26 0 9.54-4.28 9.54-9.54 0-2.55-.99-4.95-2.8-6.75a9.48 9.48 0 0 0-6.75-2.72zm0 17.42h-.01a7.9 7.9 0 0 1-4.03-1.1l-.29-.17-2.99.78.8-2.92-.19-.3a7.88 7.88 0 0 1-1.21-4.2c0-4.37 3.56-7.92 7.93-7.92 2.12 0 4.11.83 5.61 2.33a7.87 7.87 0 0 1 2.32 5.6c0 4.37-3.56 7.92-7.94 7.92z"
+          opacity=".55" />
+      </svg>
+    </a>
   </div>
-</header>
 
-<div class="mnav" id="mnav">
-  <a href="#filosofia">Filosofía</a>
-  <a href="#catalogo">Colección</a>
-  <a href="#clientas">Clientas</a>
-  <a href="#faq">Preguntas</a>
-</div>
-
-<span id="top"></span>
-
-<!-- ================= HERO ================= -->
-<section class="hero">
-  <div class="hero-media">
-    <div class="ph">
-      <div class="ph-note">
-        <span class="tag">Video · Hero</span>
-        modelo <br>ejemplo
-      </div>
-    </div>
-  </div>
-  <div class="play-pill">
-    <span class="ring"></span>
-  </div>
-  <div class="container hero-inner">
-    <img src="assets/logo-mark-cream.png" alt="" class="hero-mark reveal" />
-    <h1>Agua de Mar</h1>
-    <p class="sub">Trajes de baño hechos para durar. Pensados para el mar de Costa Rica.</p>
-    <div class="cta-row">
-      <a href="#catalogo" class="btn btn-outline">Ver colección<span class="btn-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span></a>
-    </div>
-  </div>
-</section>
-
-<!-- ================= FILOSOFÍA ================= -->
-<section class="block" id="filosofia">
-  <div class="container philo">
-    <div class="copy reveal">
-      <p class="eyebrow">Nuestra filosofía</p>
-      <h2>Empezamos con un bikini.</h2>
-      <p>La misma calidad que marcas que cuestan el doble. Telas resistentes al cloro y al agua salada, costuras que aguantan estación tras estación.</p>
-      <p>Hecho en Costa Rica, pensado para el mar. Sin lógica de temporada, sin prisa. Ropa que se queda con vos.</p>
-      <p class="signature">— Hecho a mano en San Carlos</p>
-    </div>
-    <div class="figure ph reveal">
-      <div class="ph-note">
-        <span class="tag">Foto · Filosofía</span>
-        ejemplo / modelo <br>ejemplo
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================= CATÁLOGO ================= -->
-<section class="block" id="catalogo">
-  <div class="container">
-    <div class="sec-head reveal">
-      <p class="eyebrow">La colección</p>
-      <h2>Cuarenta piezas, un solo estándar.</h2>
-      <p>Explorá libremente. Cada pieza está pensada para el mar de Costa Rica.</p>
-    </div>
-    <div class="filters reveal" id="filters"></div>
-    <div class="masonry" id="masonry"></div>
-    <p class="catalog-foot" id="catalogFoot"></p>
-  </div>
-</section>
-
-<!-- ================= DESTACADA ================= -->
-<section class="block" id="destacada">
-  <div class="container">
-    <div class="sec-head reveal">
-      <p class="eyebrow">Lo más querido</p>
-      <h2>Colección destacada</h2>
-    </div>
-    <div class="featured" id="featured"></div>
-    <div class="reveal sec-cta">
-      <a href="#catalogo" class="btn btn-ghost">Ver toda la colección<span class="btn-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span></a>
-    </div>
-  </div>
-</section>
-
-<!-- ================= CLIENTAS ================= -->
-<section class="block clientas" id="clientas">
-  <div class="container">
-    <div class="sec-head reveal">
-      <p class="eyebrow">Pura vida</p>
-      <h2>Nuestras clientas</h2>
-      <p>Mujeres reales, sus piezas favoritas.</p>
-    </div>
-    <div class="gallery" id="gallery"></div>
-  </div>
-</section>
-
-<!-- ================= FAQ ================= -->
-<section class="block" id="faq">
-  <div class="container">
-    <div class="sec-head reveal">
-      <p class="eyebrow">Lo esencial</p>
-      <h2>Preguntas frecuentes</h2>
-    </div>
-    <div class="faq-wrap reveal" id="faqWrap"></div>
-  </div>
-</section>
-
-<!-- ================= FOOTER ================= -->
-<footer>
-  <div class="container">
-    <div class="foot-grid">
-      <div>
-        <div class="brand"><img src="assets/logo-mark-cream.png" alt="Agua de Mar" class="foot-mark" /><span class="brand-word">Agua de Mar</span></div>
-        <p class="foot-tag">Beachwear honesto, hecho en Costa Rica para durar más que una temporada.</p>
-      </div>
-      <div class="foot-col">
-        <h4>Contacto</h4>
-        <a href="https://www.instagram.com/aguademarbeachwearcr" data-ig-link target="_blank" rel="noopener">Instagram</a>
-        <a href="https://wa.me/50683425634" data-wa-link target="_blank" rel="noopener">WhatsApp</a>
-        <a href="mailto:hola@aguademar.cr">hola@aguademar.cr</a>
-      </div>
-      <div class="foot-col">
-        <h4>Boletín</h4>
-        <p class="foot-tag tight">Nuevas piezas, sin spam. Una vez al mes.</p>
-        <form class="news" id="news">
-          <input type="email" placeholder="tu correo" required aria-label="Correo" />
-          <button type="submit" aria-label="Suscribirse">
-            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
-        </form>
-      </div>
-    </div>
-    <div class="foot-bottom">
-      <span>© 2026 Agua de Mar Beachwear CR</span>
-      <span class="pv">Pura vida 🌊</span>
-    </div>
-  </div>
-</footer>
-
-<!-- ================= CART DRAWER ================= -->
-<div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Carrito">
-  <div class="drawer-head">
-    <h3>Tu carrito</h3>
-    <button class="icon-btn" id="cartClose" aria-label="Cerrar">
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"/></svg>
-    </button>
-  </div>
-  <div class="drawer-body" id="drawerBody"></div>
-  <div class="drawer-foot" id="drawerFoot" style="display:none;">
-    <div class="sub-row">
-      <span class="lbl">Subtotal</span>
-      <span class="val" id="subtotal">₡0</span>
-    </div>
-    <p class="ship-note">Envíos a todo el país</p>
-    <button class="btn btn-solid" id="checkout">Finalizar por WhatsApp</button>
-    <p class="wa">Coordinamos pago y envío por mensaje</p>
-  </div>
-</aside>
-
-<!-- ================= DETAIL MODAL ================= -->
-<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Detalle de producto">
-  <div class="panel">
-    <div class="pimg">
-      <button class="icon-btn pclose" id="modalClose" aria-label="Cerrar">
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
-      <div class="ph" id="mImg"></div>
-    </div>
-    <div class="pinfo">
-      <p class="eyebrow pcat" id="mCat"></p>
-      <h2 id="mName"></h2>
-      <p class="pprice" id="mPrice"></p>
-      <p class="pdesc" id="mDesc"></p>
-      <p class="plabel">Talla</p>
-      <div class="sizes" id="mSizes"></div>
-      <div class="size-hint" id="mHint">Elegí una talla para continuar</div>
-      <div class="pcare">
-        <span>✓ Resistente al cloro</span>
-        <span>✓ Apta agua salada</span>
-        <span>✓ Hecho en CR</span>
-      </div>
-      <div class="padd">
-        <button class="btn btn-solid" id="mAdd">Agregar al carrito</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast">
-  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
-  <span id="toastMsg">Agregado al carrito</span>
-</div>
-
-<!-- ================= BOTONES FLOTANTES ================= -->
-<div class="fab-stack">
-  <a class="fab fab-ig" data-ig-link href="https://www.instagram.com/aguademarbeachwearcr" target="_blank" rel="noopener" aria-label="Síguenos en Instagram">
-    <span class="fab-tip">Instagram</span>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="5"/>
-      <circle cx="12" cy="12" r="4"/>
-      <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/>
-    </svg>
-  </a>
-  <a class="fab fab-wa" data-wa-link href="https://wa.me/50683425634" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
-    <span class="fab-tip">WhatsApp</span>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35z"/>
-      <path d="M12.04 2.5C6.78 2.5 2.5 6.78 2.5 12.04c0 1.68.44 3.32 1.27 4.77L2.5 21.5l4.8-1.26a9.5 9.5 0 0 0 4.74 1.27h.01c5.26 0 9.54-4.28 9.54-9.54 0-2.55-.99-4.95-2.8-6.75a9.48 9.48 0 0 0-6.75-2.72zm0 17.42h-.01a7.9 7.9 0 0 1-4.03-1.1l-.29-.17-2.99.78.8-2.92-.19-.3a7.88 7.88 0 0 1-1.21-4.2c0-4.37 3.56-7.92 7.93-7.92 2.12 0 4.11.83 5.61 2.33a7.87 7.87 0 0 1 2.32 5.6c0 4.37-3.56 7.92-7.94 7.92z" opacity=".55"/>
-    </svg>
-  </a>
-</div>
-
-<script src="js/data.js"></script>
-<script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
 </body>
+
 </html>
