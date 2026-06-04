@@ -1,0 +1,19 @@
+# Dependencias y logs
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+.thumbnail/
+.thumbnail
+
+# Archivos de entorno y secretos
+.env
+.env.local
+
+# Carpetas y archivos de respaldo/temporales
+screenshots/
+*backup*
+*.bak
