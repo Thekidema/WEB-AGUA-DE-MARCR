@@ -46,6 +46,7 @@ for(let idx=0; idx<PRODUCT_COUNT; idx++){
     tone:tones[idx%tones.length],
     ratio:ratios[idx%ratios.length],
     desc:descs[idx%descs.length],
+    image: `uploads/${ty.t.toLowerCase().replace(' ','-')}-${colorways[idx%colorways.length].toLowerCase().replace(' ','-')}.jpg`
   });
 }
 

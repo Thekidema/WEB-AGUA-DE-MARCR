@@ -41,7 +41,7 @@ const cardHTML=p=>`
   <article class="card" data-id="${p.id}">
     <div class="frame" style="aspect-ratio:4/5;">
       <div class="ph ph-img" style="--tone:${p.tone};">
-        <span class="ph-word">Foto</span>
+        ${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;" onerror="this.style.display='none'">` : '<span class="ph-word">Foto</span>'}
       </div>
       <div class="overlay">
         <span class="see">Ver detalle →</span>
@@ -78,7 +78,7 @@ function renderFeatured(){
   $('#featured').innerHTML=picks.map((p,i)=>`
     <div class="feat" data-id="${p.id}">
       <div class="frame" style="${sizes[i]}">
-        <div class="ph" style="--tone:${p.tone};"><span class="ph-word">Foto</span></div>
+        <div class="ph" style="--tone:${p.tone};">${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;" onerror="this.style.display='none'">` : '<span class="ph-word">Foto</span>'}</div>
       </div>
       <div class="name">${p.type} ${p.color}</div>
       <div class="sub">${crc(p.price)}</div>
@@ -119,6 +119,7 @@ function addToCart(id,size,qty=1){
   saveCart();updateCount();bumpCount();renderCart();
 }
 function removeFromCart(id,size){cart=cart.filter(i=>!(i.id===id&&i.size===size));saveCart();updateCount();renderCart();}
+function clearCart(){cart=[];saveCart();updateCount();renderCart();}
 function changeQty(id,size,d){
   const it=cart.find(i=>i.id===id&&i.size===size);if(!it)return;
   it.qty+=d;if(it.qty<1)return removeFromCart(id,size);
@@ -137,7 +138,7 @@ function renderCart(){
   body.innerHTML=cart.map(i=>{
     const p=findProduct(i.id);if(!p)return'';
     return `<div class="ci">
-      <div class="thumb"><div class="ph" style="--tone:${p.tone};"></div></div>
+      <div class="thumb"><div class="ph" style="--tone:${p.tone};">${p.image ? `<img src="${p.image}" alt="" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;" onerror="this.style.display='none'">` : ''}</div></div>
       <div class="info">
         <div class="top">
           <div><div class="nm">${p.type} ${p.color}</div><div class="sz">Talla ${esc(i.size)}</div></div>
@@ -180,7 +181,7 @@ function openModal(id){
   const p=findProduct(id);if(!p)return;
   modalProduct=p;modalSize=null;
   $('#mImg').style.setProperty('--tone',p.tone);
-  $('#mImg').innerHTML='<span class="ph-word">Foto</span>';
+  $('#mImg').innerHTML=p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;" onerror="this.style.display='none'">` : '<span class="ph-word">Foto</span>';
   $('#mCat').textContent=p.type;
   $('#mName').textContent=p.type+' '+p.color;
   $('#mPrice').textContent=crc(p.price);
@@ -188,10 +189,12 @@ function openModal(id){
   $('#mSizes').innerHTML=p.sizes.map(s=>`<button class="size" data-size="${s}">${s}</button>`).join('');
   $('#mHint').classList.remove('show');
   lastFocus=document.activeElement;
+  history.replaceState(null, null, `#producto-${p.id}`);
   $('#modal').classList.add('show');document.body.style.overflow='hidden';setBgInert(true);
   setTimeout(()=>$('#modalClose').focus(),60);
 }
 const closeModal=()=>{
+  history.replaceState(null, null, window.location.pathname + window.location.search);
   $('#modal').classList.remove('show');document.body.style.overflow='';setBgInert(false);
   if(lastFocus&&lastFocus.isConnected)lastFocus.focus();
 };
@@ -243,6 +246,7 @@ $('#mAdd').addEventListener('click',()=>{
 
 $('#cartOpen').addEventListener('click',openCart);
 $('#cartClose').addEventListener('click',closeCart);
+const btnClear=$('#cartClear');if(btnClear)btnClear.addEventListener('click',clearCart);
 $('#scrim').addEventListener('click',()=>{closeCart();});
 $('#modalClose').addEventListener('click',closeModal);
 $('#modal').addEventListener('click',e=>{if(e.target===$('#modal'))closeModal();});
@@ -260,7 +264,13 @@ $('#checkout').addEventListener('click',()=>{
 $$('[data-wa-link]').forEach(a=>a.href=`https://wa.me/${WHATSAPP}`);
 $$('[data-ig-link]').forEach(a=>a.href=INSTAGRAM);
 
-$('#news').addEventListener('submit',e=>{e.preventDefault();e.target.reset();toast('¡Gracias! Te escribiremos pronto.');});
+$('#news').addEventListener('submit',e=>{
+  e.preventDefault();
+  const form=e.target;
+  fetch(form.action,{method:form.method,body:new FormData(form),headers:{'Accept':'application/json'}})
+  .then(res=>{if(res.ok){form.reset();toast('¡Gracias! Te escribiremos pronto.');}else{toast('Hubo un error. Intenta de nuevo.');}})
+  .catch(()=>toast('Hubo un error de conexión.'));
+});
 
 // header scroll
 const header=$('#header');
@@ -298,3 +308,8 @@ function observeReveals(){
 renderFilters();renderCatalog();renderFeatured();renderClientas();renderFaq();
 updateCount();renderCart();
 observeReveals();
+
+if(window.location.hash&&window.location.hash.startsWith('#producto-')){
+  const id=window.location.hash.replace('#producto-','');
+  setTimeout(()=>openModal(id), 100);
+}
