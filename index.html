@@ -32,10 +32,10 @@
         <span class="brand-word">Agua de Mar</span>
       </a>
       <nav class="main">
-        <a href="#filosofia">Filosofía</a>
-        <a href="#catalogo">Colección</a>
-        <a href="#clientas">Clientas</a>
-        <a href="#faq">Preguntas</a>
+        <a href="#filosofia"><i data-lucide="sparkles"></i>Filosofía</a>
+        <a href="#catalogo"><i data-lucide="layout-grid"></i>Colección</a>
+        <a href="#clientas"><i data-lucide="heart"></i>Clientas</a>
+        <a href="#faq"><i data-lucide="help-circle"></i>Preguntas</a>
       </nav>
       <div class="head-right">
         <button class="cart-btn" id="cartOpen" aria-label="Abrir carrito">
@@ -56,10 +56,10 @@
   </header>
 
   <div class="mnav" id="mnav">
-    <a href="#filosofia">Filosofía</a>
-    <a href="#catalogo">Colección</a>
-    <a href="#clientas">Clientas</a>
-    <a href="#faq">Preguntas</a>
+    <a href="#filosofia"><i data-lucide="sparkles"></i>Filosofía</a>
+    <a href="#catalogo"><i data-lucide="layout-grid"></i>Colección</a>
+    <a href="#clientas"><i data-lucide="heart"></i>Clientas</a>
+    <a href="#faq"><i data-lucide="help-circle"></i>Preguntas</a>
   </div>
 
   <span id="top"></span>
@@ -102,6 +102,11 @@
           aguantan estación tras estación.</p>
         <p>Hecho en Costa Rica, pensado para el mar. Sin lógica de temporada, sin prisa. Ropa que se queda con vos.</p>
         <p class="signature">— Hecho a mano en San Carlos</p>
+        <ul class="feat-list">
+          <li><i data-lucide="droplets"></i>Resistente al mar, al cloro y al sol</li>
+          <li><i data-lucide="leaf"></i>Hecho a mano en Costa Rica</li>
+          <li><i data-lucide="shield-check"></i>Dura más de una temporada</li>
+        </ul>
       </div>
       <div class="figure ph reveal">
         <div class="ph-note">
@@ -294,8 +299,10 @@
     </a>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 
 </html>
