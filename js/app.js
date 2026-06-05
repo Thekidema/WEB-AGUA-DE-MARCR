@@ -88,36 +88,11 @@ function renderFeatured(){
 
 /* =================== CARRUSEL 3D (CLIENTAS) =================== */
 const carouselSlides = [
-  {
-    src: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=600&auto=format&fit=crop&q=80',
-    alt: 'Playa tropical al atardecer',
-    name: 'Bikini Coral',
-    price: crc(34900),
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
-    alt: 'Playa de arena blanca con agua cristalina',
-    name: 'Enterizo Turquesa',
-    price: crc(46900),
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=600&auto=format&fit=crop&q=80',
-    alt: 'Olas rompiendo en la costa',
-    name: 'Cover up Terracota',
-    price: crc(39900),
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=600&auto=format&fit=crop&q=80',
-    alt: 'Palmeras tropicales en la playa',
-    name: 'Top Arena',
-    price: crc(22900),
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&auto=format&fit=crop&q=80',
-    alt: 'Playa paradisíaca con cielo azul',
-    name: 'Pareo Mostaza',
-    price: crc(18900),
-  },
+  { alt: 'Modelo 1' },
+  { alt: 'Modelo 2' },
+  { alt: 'Modelo 3' },
+  { alt: 'Modelo 4' },
+  { alt: 'Modelo 5' },
 ];
 
 let carouselIndex = Math.floor(carouselSlides.length / 2);
@@ -131,11 +106,7 @@ function renderCarousel() {
   // render slides
   track.innerHTML = carouselSlides.map((s, i) => `
     <div class="carousel-slide" data-slide="${i}">
-      <img src="${s.src}" alt="${s.alt}" loading="lazy" />
-      <div class="carousel-label">
-        <div class="carousel-name">${s.name}</div>
-        <div class="carousel-price">${s.price}</div>
-      </div>
+      ${s.src ? `<img src="${s.src}" alt="${s.alt}" loading="lazy" />` : `<div class="carousel-placeholder" aria-label="${s.alt}"></div>`}
     </div>
   `).join('');
 
