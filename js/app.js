@@ -86,21 +86,161 @@ function renderFeatured(){
   applyTilt();
 }
 
-/* =================== CLIENTAS =================== */
-function renderClientas(){
-  $('#gallery').innerHTML=clientas.map(c=>`
-    <div class="client reveal">
-      <div class="frame ph" style="--tone:${c.tone};"><span class="ph-word">Foto</span></div>
-    </div>`).join('');
+/* =================== CARRUSEL 3D (CLIENTAS) =================== */
+const carouselSlides = [
+  {
+    src: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=600&auto=format&fit=crop&q=80',
+    alt: 'Playa tropical al atardecer',
+    name: 'Bikini Coral',
+    price: crc(34900),
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
+    alt: 'Playa de arena blanca con agua cristalina',
+    name: 'Enterizo Turquesa',
+    price: crc(46900),
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=600&auto=format&fit=crop&q=80',
+    alt: 'Olas rompiendo en la costa',
+    name: 'Cover up Terracota',
+    price: crc(39900),
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=600&auto=format&fit=crop&q=80',
+    alt: 'Palmeras tropicales en la playa',
+    name: 'Top Arena',
+    price: crc(22900),
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&auto=format&fit=crop&q=80',
+    alt: 'Playa paradisíaca con cielo azul',
+    name: 'Pareo Mostaza',
+    price: crc(18900),
+  },
+];
+
+let carouselIndex = Math.floor(carouselSlides.length / 2);
+let carouselTimer = null;
+
+function renderCarousel() {
+  const track = $('#carouselTrack');
+  const dots = $('#carouselDots');
+  if (!track || !dots) return;
+
+  // render slides
+  track.innerHTML = carouselSlides.map((s, i) => `
+    <div class="carousel-slide" data-slide="${i}">
+      <img src="${s.src}" alt="${s.alt}" loading="lazy" />
+      <div class="carousel-label">
+        <div class="carousel-name">${s.name}</div>
+        <div class="carousel-price">${s.price}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // render dots
+  dots.innerHTML = carouselSlides.map((_, i) =>
+    `<button class="carousel-dot${i === carouselIndex ? ' active' : ''}" data-dot="${i}" aria-label="Ir a imagen ${i + 1}"></button>`
+  ).join('');
+
+  updateCarousel();
 }
+
+function updateCarousel() {
+  const slides = $$('.carousel-slide');
+  const dots = $$('.carousel-dot');
+  const total = carouselSlides.length;
+
+  slides.forEach((slide, index) => {
+    const offset = index - carouselIndex;
+    let pos = ((offset % total) + total) % total;
+    if (pos > Math.floor(total / 2)) pos = pos - total;
+
+    const isCenter = pos === 0;
+    const isAdjacent = Math.abs(pos) === 1;
+
+    slide.style.transform = `
+      translateX(${pos * 55}%)
+      scale(${isCenter ? 1 : isAdjacent ? 0.82 : 0.65})
+      rotateY(${pos * -12}deg)
+    `;
+    slide.style.zIndex = isCenter ? 10 : isAdjacent ? 5 : 1;
+    slide.style.opacity = isCenter ? 1 : isAdjacent ? 0.45 : 0;
+    slide.style.filter = isCenter ? 'blur(0px)' : isAdjacent ? 'blur(3px)' : 'blur(6px)';
+    slide.style.visibility = Math.abs(pos) > 2 ? 'hidden' : 'visible';
+    slide.classList.toggle('is-center', isCenter);
+  });
+
+  dots.forEach((dot, i) => dot.classList.toggle('active', i === carouselIndex));
+}
+
+function carouselNext() {
+  carouselIndex = (carouselIndex + 1) % carouselSlides.length;
+  updateCarousel();
+}
+function carouselPrev() {
+  carouselIndex = (carouselIndex - 1 + carouselSlides.length) % carouselSlides.length;
+  updateCarousel();
+}
+
+function startCarouselAutoplay() {
+  stopCarouselAutoplay();
+  carouselTimer = setInterval(carouselNext, 4000);
+}
+function stopCarouselAutoplay() {
+  if (carouselTimer) { clearInterval(carouselTimer); carouselTimer = null; }
+}
+
+function initCarousel() {
+  renderCarousel();
+
+  const prevBtn = $('#carouselPrev');
+  const nextBtn = $('#carouselNext');
+  const carousel = $('#carousel');
+  if (!prevBtn || !nextBtn || !carousel) return;
+
+  prevBtn.addEventListener('click', () => { carouselPrev(); startCarouselAutoplay(); });
+  nextBtn.addEventListener('click', () => { carouselNext(); startCarouselAutoplay(); });
+
+  // dot clicks
+  carousel.addEventListener('click', e => {
+    const dot = e.target.closest('[data-dot]');
+    if (dot) {
+      carouselIndex = +dot.dataset.dot;
+      updateCarousel();
+      startCarouselAutoplay();
+    }
+  });
+
+  // pause on hover
+  carousel.addEventListener('mouseenter', stopCarouselAutoplay);
+  carousel.addEventListener('mouseleave', startCarouselAutoplay);
+
+  // touch / swipe
+  let touchX = 0;
+  carousel.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  carousel.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) {
+      dx > 0 ? carouselPrev() : carouselNext();
+      startCarouselAutoplay();
+    }
+  }, { passive: true });
+
+  startCarouselAutoplay();
+}
+
+/* (clientas gallery replaced by carousel above) */
 
 /* =================== FAQ =================== */
 function renderFaq(){
   $('#faqWrap').innerHTML=faqs.map((f,i)=>`
     <div class="faq-item" data-i="${i}">
-      <button class="faq-q" aria-expanded="false"><h3>${f.q}</h3><span class="pm" aria-hidden="true"></span></button>
+      <button class="faq-q" aria-expanded="false"><h3>${f.q}</h3><i data-lucide="chevron-down" class="faq-icon" aria-hidden="true"></i></button>
       <div class="faq-a"><p>${f.a}</p></div>
     </div>`).join('');
+  if(typeof lucide!=='undefined') lucide.createIcons();
 }
 
 /* =================== CART =================== */
@@ -214,7 +354,7 @@ document.addEventListener('click',e=>{
   if(chip){activeFilter=chip.dataset.cat;renderFilters();renderCatalog();observeReveals();return;}
   // quick add
   const q=e.target.closest('[data-quick]');
-  if(q){e.stopPropagation();const p=findProduct(q.dataset.quick);addToCart(p.id,p.sizes[Math.min(1,p.sizes.length-1)],1);toast('Agregado · '+p.type+' '+p.color);return;}
+  if(q){e.stopPropagation();const p=findProduct(q.dataset.quick);if(!p)return;addToCart(p.id,p.sizes[Math.min(1,p.sizes.length-1)],1);toast('Agregado · '+p.type+' '+p.color);return;}
   // abrir detalle (card o featured)
   const card=e.target.closest('.card[data-id], .feat[data-id]');
   if(card){openModal(card.dataset.id);return;}
@@ -305,9 +445,10 @@ function observeReveals(){
 }
 
 /* =================== INIT =================== */
-renderFilters();renderCatalog();renderFeatured();renderClientas();renderFaq();
+renderFilters();renderCatalog();renderFeatured();initCarousel();renderFaq();
 updateCount();renderCart();
 observeReveals();
+if(typeof lucide!=='undefined') lucide.createIcons();
 
 if(window.location.hash&&window.location.hash.startsWith('#producto-')){
   const id=window.location.hash.replace('#producto-','');

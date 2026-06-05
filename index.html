@@ -149,7 +149,7 @@
     </div>
   </section>
 
-  <!-- ================= CLIENTAS ================= -->
+  <!-- ================= CLIENTAS (CARRUSEL 3D) ================= -->
   <section class="block clientas" id="clientas">
     <div class="container">
       <div class="sec-head reveal">
@@ -157,7 +157,30 @@
         <h2>Nuestras clientas</h2>
         <p>Mujeres reales, sus piezas favoritas.</p>
       </div>
-      <div class="gallery" id="gallery"></div>
+    </div>
+
+    <!-- Carrusel 3D -->
+    <div class="carousel carousel--large" id="carousel">
+      <!-- Gradientes decorativos -->
+      <div class="carousel-bg" aria-hidden="true">
+        <div class="carousel-blob carousel-blob--left"></div>
+        <div class="carousel-blob carousel-blob--right"></div>
+      </div>
+
+      <div class="carousel-track" id="carouselTrack">
+        <!-- slides se inyectan desde JS -->
+      </div>
+
+      <!-- Navegación -->
+      <button class="carousel-btn carousel-btn--prev" id="carouselPrev" aria-label="Anterior">
+        <i data-lucide="chevron-left"></i>
+      </button>
+      <button class="carousel-btn carousel-btn--next" id="carouselNext" aria-label="Siguiente">
+        <i data-lucide="chevron-right"></i>
+      </button>
+
+      <!-- Indicadores -->
+      <div class="carousel-dots" id="carouselDots"></div>
     </div>
   </section>
 
