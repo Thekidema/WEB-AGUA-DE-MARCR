@@ -6,6 +6,8 @@
 
 /* =================== HELPERS =================== */
 const $=(s,el=document)=>el.querySelector(s);
+/* onerror delegado — el CSP bloquea atributos inline; este listener en capture phase los cubre todos */
+document.addEventListener('error', e=>{ if(e.target.tagName==='IMG') e.target.style.display='none'; }, true);
 const $$=(s,el=document)=>[...el.querySelectorAll(s)];
 const crc=n=>'₡'+Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 const phNote=(tag,body)=>`<div class="ph-note"><span class="tag">${tag}</span>${body}</div>`;
@@ -26,8 +28,14 @@ function tiltify(el){
 function applyTilt(){ if(!canTilt)return; $$('.card, .feat').forEach(el=>{ if(!el.dataset.tilt){el.dataset.tilt='1';tiltify(el);} }); }
 
 /* =================== STATE =================== */
+const SAFE_KEYS = new Set(['id','size','qty']);
+const cartReviver = (key, val) => {
+  if (key !== '' && !SAFE_KEYS.has(key)) return undefined;
+  if (key === '__proto__' || key === 'constructor' || key === 'prototype') return undefined;
+  return val;
+};
 let cart;
-try { cart=JSON.parse(localStorage.getItem('adm_cart')||'[]'); }
+try { cart=JSON.parse(localStorage.getItem('adm_cart')||'[]', cartReviver); }
 catch { cart=[]; }
 if(!Array.isArray(cart)) cart=[];
 cart=cart.filter(i=>
@@ -46,7 +54,7 @@ const cardHTML=p=>`
   <article class="card" data-id="${p.id}">
     <div class="frame" style="aspect-ratio:4/5;">
       <div class="ph ph-img" style="--tone:${p.tone};">
-        ${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;" onerror="this.style.display='none'">` : '<span class="ph-word">Foto</span>'}
+        ${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;">` : '<span class="ph-word">Foto</span>'}
       </div>
       <div class="overlay">
         <span class="see">Ver detalle →</span>
@@ -83,7 +91,7 @@ function renderFeatured(){
   $('#featured').innerHTML=picks.map((p,i)=>`
     <div class="feat" data-id="${p.id}">
       <div class="frame" style="${sizes[i]}">
-        <div class="ph" style="--tone:${p.tone};">${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;" onerror="this.style.display='none'">` : '<span class="ph-word">Foto</span>'}</div>
+        <div class="ph" style="--tone:${p.tone};">${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;">` : '<span class="ph-word">Foto</span>'}</div>
       </div>
       <div class="name">${p.type} ${p.color}</div>
       <div class="sub">${crc(p.price)}</div>
@@ -254,7 +262,7 @@ function renderCart(){
   body.innerHTML=cart.map(i=>{
     const p=findProduct(i.id);if(!p)return'';
     return `<div class="ci">
-      <div class="thumb"><div class="ph" style="--tone:${p.tone};">${p.image ? `<img src="${p.image}" alt="" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;" onerror="this.style.display='none'">` : ''}</div></div>
+      <div class="thumb"><div class="ph" style="--tone:${p.tone};">${p.image ? `<img src="${p.image}" alt="" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;">` : ''}</div></div>
       <div class="info">
         <div class="top">
           <div><div class="nm">${p.type} ${p.color}</div><div class="sz">Talla ${esc(i.size)}</div></div>
@@ -297,7 +305,7 @@ function openModal(id){
   const p=findProduct(id);if(!p)return;
   modalProduct=p;modalSize=null;
   $('#mImg').style.setProperty('--tone',p.tone);
-  $('#mImg').innerHTML=p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;" onerror="this.style.display='none'">` : '<span class="ph-word">Foto</span>';
+  $('#mImg').innerHTML=p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;">` : '<span class="ph-word">Foto</span>';
   $('#mCat').textContent=p.type;
   $('#mName').textContent=p.type+' '+p.color;
   $('#mPrice').textContent=crc(p.price);
@@ -371,9 +379,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeC
 $('#checkout').addEventListener('click',()=>{
   if(!cart.length)return;
   let msg='¡Hola Agua de Mar! Me interesa este pedido:%0A%0A';
-  cart.forEach(i=>{const p=findProduct(i.id);msg+=`• ${i.qty}× ${p.type} ${p.color} (talla ${i.size}) — ${crc(p.price*i.qty)}%0A`;});
+  cart.forEach(i=>{const p=findProduct(i.id);msg+=`• ${i.qty}× ${p.type} ${p.color} (talla ${encodeURIComponent(i.size)}) — ${crc(p.price*i.qty)}%0A`;});
   msg+=`%0ASubtotal: ${crc(cartSubtotal())}%0A%0A¿Me ayudan a coordinar pago y envío?`;
-  window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank');
+  window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank','noopener,noreferrer');
 });
 
 /* enlaces de contacto (footer + botones flotantes) */
