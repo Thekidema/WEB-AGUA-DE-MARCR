@@ -67,6 +67,22 @@ img { display: block; max-width: 100%; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 ::selection { background: var(--coral); color: #fff; }
 
+/* skip link — accesibilidad teclado */
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 20px;
+  background: var(--green);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 0 0 8px 8px;
+  transition: top .2s;
+}
+.skip-link:focus { top: 0; }
+
 /* foco accesible visible en cualquier elemento interactivo */
 :focus-visible {
   outline: 2px solid var(--green);
@@ -408,7 +424,6 @@ section.block { padding: 130px 0; }
 .masonry { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; align-items: start; }
 
 .card { margin-bottom: 0; cursor: pointer; transition: transform .3s var(--ease), box-shadow .35s var(--ease); transform-style: preserve-3d; }
-.card:hover { will-change: transform; }
 .card:hover .frame { box-shadow: var(--shadow-warm); }
 
 /* double-bezel: la pieza descansa en una bandeja con marco */
@@ -479,7 +494,6 @@ section.block { padding: 130px 0; }
 /* ===== DESTACADA ===== */
 .featured { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 30px; align-items: end; }
 .feat { cursor: pointer; transition: transform .3s var(--ease), box-shadow .35s var(--ease); }
-.feat:hover { will-change: transform; }
 .feat:hover .frame { box-shadow: var(--shadow-warm); }
 .feat .frame {
   position: relative;
@@ -547,7 +561,6 @@ section.block { padding: 130px 0; }
   width: 280px;
   height: 420px;
   transition: transform .55s var(--ease), opacity .55s var(--ease), filter .55s var(--ease);
-  will-change: transform, opacity, filter;
 }
 .carousel-slide img {
   width: 100%;
@@ -654,7 +667,7 @@ section.block { padding: 130px 0; }
 .faq-item { border-top: 1px solid var(--line); }
 .faq-item:last-child { border-bottom: 1px solid var(--line); }
 .faq-q { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 28px 4px; text-align: left; }
-.faq-q h3 { font-family: var(--display); font-weight: 500; font-size: 20px; }
+.faq-q-text { font-family: var(--display); font-weight: 500; font-size: 20px; }
 .faq-q .faq-icon { width: 18px; height: 18px; flex: none; stroke: var(--ink); transition: transform .35s var(--ease), stroke .25s var(--ease); }
 .faq-item.open .faq-icon { transform: rotate(180deg); stroke: var(--coral); }
 .faq-a { max-height: 0; overflow: hidden; transition: max-height .4s var(--ease); }
@@ -747,6 +760,9 @@ footer .brand-word { color: #fff; font-size: 22px; letter-spacing: .18em; }
 }
 .drawer.open { transform: perspective(1700px) translateX(0) rotateY(0); }
 .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 28px 28px 20px; border-bottom: 1px solid var(--line); }
+.drawer-head-actions { display: flex; gap: 8px; align-items: center; }
+.cart-clear-btn { font-size: 13px; text-decoration: underline; color: var(--ink-soft); margin-right: 10px; transition: color .2s; }
+.cart-clear-btn:hover { color: var(--ink); }
 .drawer-head h3 { font-family: var(--display); font-weight: 600; font-size: 20px; }
 .icon-btn { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background .2s var(--ease); }
 .icon-btn:hover { background: var(--bg-2); }

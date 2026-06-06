@@ -11,6 +11,43 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://aguademar.cr" />
   <meta property="og:image" content="https://aguademar.cr/assets/logo-mark-ink.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Agua de Mar · Beachwear Costa Rica" />
+  <meta name="twitter:description" content="Trajes de baño hechos para durar. Pensados para el mar de Costa Rica. Hechos a mano en San Carlos." />
+  <meta name="twitter:image" content="https://aguademar.cr/assets/logo-mark-ink.png" />
+  <meta name="theme-color" content="#FDF8F0" />
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    img-src 'self' data: https:;
+    connect-src https://formspree.io;
+    form-action https://formspree.io;
+    frame-ancestors 'none';
+    base-uri 'self';
+  " />
+  <link rel="canonical" href="https://aguademar.cr/" />
+  <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ClothingStore",
+    "name": "Agua de Mar",
+    "url": "https://aguademar.cr",
+    "description": "Trajes de baño hechos a mano en Costa Rica. Resistentes al mar, al cloro y al sol.",
+    "telephone": "+50683425634",
+    "email": "hola@aguademar.cr",
+    "sameAs": ["https://www.instagram.com/aguademarbeachwearcr"],
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "CR",
+      "addressRegion": "San Carlos"
+    }
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -20,14 +57,15 @@
 </head>
 
 <body>
+  <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
   <!-- ================= HEADER ================= -->
   <header id="header">
     <div class="container bar">
       <a href="#top" class="brand">
         <span class="brand-marks">
-          <img src="assets/logo-mark-cream.png" alt="" class="brand-mark mark-light" />
-          <img src="assets/logo-mark-ink.png" alt="Agua de Mar" class="brand-mark mark-dark" />
+          <img src="assets/logo-mark-cream.webp" alt="" class="brand-mark mark-light" />
+          <img src="assets/logo-mark-ink.webp" alt="Agua de Mar" class="brand-mark mark-dark" />
         </span>
         <span class="brand-word">Agua de Mar</span>
       </a>
@@ -64,7 +102,7 @@
 
   <span id="top"></span>
 
-  <main>
+  <main id="main-content">
     <!-- ================= HERO ================= -->
     <section class="hero">
     <div class="hero-media">
@@ -79,7 +117,7 @@
       <span class="ring"></span>
     </div>
     <div class="container hero-inner">
-      <img src="assets/logo-mark-cream.png" alt="" class="hero-mark reveal" />
+      <img src="assets/logo-mark-cream.webp" alt="" class="hero-mark reveal" />
       <h1>Agua de Mar</h1>
       <p class="sub">Trajes de baño hechos para durar. Pensados para el mar de Costa Rica.</p>
       <div class="cta-row">
@@ -201,7 +239,7 @@
     <div class="container">
       <div class="foot-grid">
         <div>
-          <div class="brand"><img src="assets/logo-mark-cream.png" alt="Agua de Mar" class="foot-mark" /><span
+          <div class="brand"><img src="assets/logo-mark-cream.webp" alt="Agua de Mar" class="foot-mark" /><span
               class="brand-word">Agua de Mar</span></div>
           <p class="foot-tag">Beachwear honesto, hecho en Costa Rica para durar más que una temporada.</p>
         </div>
@@ -215,8 +253,9 @@
         <div class="foot-col">
           <h4>Boletín</h4>
           <p class="foot-tag tight">Nuevas piezas, sin spam. Una vez al mes.</p>
+          <!-- REEMPLAZAR YOUR_FORM_ID con el ID real de Formspree antes de publicar -->
           <form class="news" id="news" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-            <input type="email" placeholder="tu correo" required aria-label="Correo" />
+            <input type="email" name="email" placeholder="tu correo" required aria-label="Correo" />
             <button type="submit" aria-label="Suscribirse">
               <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="1.5">
@@ -238,8 +277,8 @@
   <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Carrito">
     <div class="drawer-head">
       <h3>Tu carrito</h3>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button id="cartClear" style="font-size: 13px; text-decoration: underline; color: var(--ink-soft); margin-right: 10px; transition: color .2s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Vaciar</button>
+      <div class="drawer-head-actions">
+        <button id="cartClear" class="cart-clear-btn">Vaciar</button>
         <button class="icon-btn" id="cartClose" aria-label="Cerrar">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M6 6l12 12M18 6L6 18" />
@@ -322,10 +361,11 @@
     </a>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/app.js"></script>
-  <script>lucide.createIcons();</script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.511.0/dist/umd/lucide.min.js"
+    integrity="sha384-YCxwI7HW+hlnktW3yOnKN44k9F/E859McBSCz+NoK45Sww88vGY9Kqfdo794td6J"
+    crossorigin="anonymous" defer></script>
+  <script src="js/data.js" defer></script>
+  <script src="js/app.js" defer></script>
 </body>
 
 </html>

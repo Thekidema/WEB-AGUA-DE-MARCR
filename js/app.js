@@ -30,8 +30,13 @@ let cart;
 try { cart=JSON.parse(localStorage.getItem('adm_cart')||'[]'); }
 catch { cart=[]; }
 if(!Array.isArray(cart)) cart=[];
-// descartar items cuyo producto ya no existe (evita contador fantasma)
-cart=cart.filter(i=>i&&findProduct(i.id));
+cart=cart.filter(i=>
+  i &&
+  typeof i.id === 'string' &&
+  typeof i.size === 'string' && i.size.length < 20 &&
+  Number.isInteger(i.qty) && i.qty > 0 && i.qty < 1000 &&
+  findProduct(i.id)
+);
 const saveCart=()=>localStorage.setItem('adm_cart',JSON.stringify(cart));
 let activeFilter='Todo';
 let modalProduct=null, modalSize=null;
@@ -208,7 +213,7 @@ function initCarousel() {
 function renderFaq(){
   $('#faqWrap').innerHTML=faqs.map((f,i)=>`
     <div class="faq-item" data-i="${i}">
-      <button class="faq-q" aria-expanded="false"><h3>${f.q}</h3><i data-lucide="chevron-down" class="faq-icon" aria-hidden="true"></i></button>
+      <button class="faq-q" aria-expanded="false"><span class="faq-q-text">${f.q}</span><i data-lucide="chevron-down" class="faq-icon" aria-hidden="true"></i></button>
       <div class="faq-a"><p>${f.a}</p></div>
     </div>`).join('');
   if(typeof lucide!=='undefined') lucide.createIcons();
