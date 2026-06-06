@@ -8,6 +8,8 @@
 const $=(s,el=document)=>el.querySelector(s);
 /* onerror delegado — el CSP bloquea atributos inline; este listener en capture phase los cubre todos */
 document.addEventListener('error', e=>{ if(e.target.tagName==='IMG') e.target.style.display='none'; }, true);
+/* aplica --tone desde data-tone tras cualquier innerHTML (evita style="--tone:..." inline → CSP unsafe-inline) */
+const applyTones=(root=document)=>root.querySelectorAll('[data-tone]').forEach(el=>el.style.setProperty('--tone',el.dataset.tone));
 const $$=(s,el=document)=>[...el.querySelectorAll(s)];
 const crc=n=>'₡'+Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 const phNote=(tag,body)=>`<div class="ph-note"><span class="tag">${tag}</span>${body}</div>`;
@@ -52,9 +54,9 @@ let modalProduct=null, modalSize=null;
 /* =================== RENDER CATALOG =================== */
 const cardHTML=p=>`
   <article class="card" data-id="${p.id}">
-    <div class="frame" style="aspect-ratio:4/5;">
-      <div class="ph ph-img" style="--tone:${p.tone};">
-        ${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;">` : '<span class="ph-word">Foto</span>'}
+    <div class="frame">
+      <div class="ph ph-img" data-tone="${p.tone}">
+        ${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` : '<span class="ph-word">Foto</span>'}
       </div>
       <div class="overlay">
         <span class="see">Ver detalle →</span>
@@ -75,6 +77,7 @@ const cardHTML=p=>`
 function renderCatalog(){
   const list=activeFilter==='Todo'?products:products.filter(p=>p.type===activeFilter);
   $('#masonry').innerHTML=list.map(cardHTML).join('');
+  applyTones($('#masonry'));
   $('#catalogFoot').textContent=`${list.length} ${list.length===1?'pieza':'piezas'}${activeFilter!=='Todo'?' · '+activeFilter:''}`;
   applyTilt();
 }
@@ -87,15 +90,16 @@ function renderFilters(){
 /* =================== FEATURED =================== */
 function renderFeatured(){
   const picks=[products[2],products[11],products[24]];
-  const sizes=['aspect-ratio:4/5','aspect-ratio:3/4','aspect-ratio:3/4'];
+  const sizeClasses=['ar-4-5','ar-3-4','ar-3-4'];
   $('#featured').innerHTML=picks.map((p,i)=>`
     <div class="feat" data-id="${p.id}">
-      <div class="frame" style="${sizes[i]}">
-        <div class="ph" style="--tone:${p.tone};">${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;">` : '<span class="ph-word">Foto</span>'}</div>
+      <div class="frame ${sizeClasses[i]}">
+        <div class="ph" data-tone="${p.tone}">${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` : '<span class="ph-word">Foto</span>'}</div>
       </div>
       <div class="name">${p.type} ${p.color}</div>
       <div class="sub">${crc(p.price)}</div>
     </div>`).join('');
+  applyTones($('#featured'));
   applyTilt();
 }
 
@@ -262,7 +266,7 @@ function renderCart(){
   body.innerHTML=cart.map(i=>{
     const p=findProduct(i.id);if(!p)return'';
     return `<div class="ci">
-      <div class="thumb"><div class="ph" style="--tone:${p.tone};">${p.image ? `<img src="${p.image}" alt="" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;">` : ''}</div></div>
+      <div class="thumb"><div class="ph" data-tone="${p.tone}">${p.image ? `<img src="${p.image}" alt="" class="prod-img">` : ''}</div></div>
       <div class="info">
         <div class="top">
           <div><div class="nm">${p.type} ${p.color}</div><div class="sz">Talla ${esc(i.size)}</div></div>
@@ -277,6 +281,7 @@ function renderCart(){
       </div>
     </div>`;
   }).join('');
+  applyTones(body);
   $('#subtotal').textContent=crc(cartSubtotal());
   foot.style.display='block';
 }
@@ -305,7 +310,7 @@ function openModal(id){
   const p=findProduct(id);if(!p)return;
   modalProduct=p;modalSize=null;
   $('#mImg').style.setProperty('--tone',p.tone);
-  $('#mImg').innerHTML=p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:2;">` : '<span class="ph-word">Foto</span>';
+  $('#mImg').innerHTML=p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` : '<span class="ph-word">Foto</span>';
   $('#mCat').textContent=p.type;
   $('#mName').textContent=p.type+' '+p.color;
   $('#mPrice').textContent=crc(p.price);
