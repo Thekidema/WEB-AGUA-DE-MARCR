@@ -1,7 +1,10 @@
 /* ============================================================
    Agua de Mar — app.js
    Lógica de interfaz: render, carrito, modal, eventos.
-   Depende de data.js (cargado antes).
+
+   - Usa AguaDeMar.data (de data.js) para evitar globals sueltos.
+   - Manejo centralizado de errores (handleError).
+   - Cart y renders protegidos con try/catch.
    ============================================================ */
 
 /* =================== HELPERS =================== */
@@ -28,6 +31,9 @@ function handleError(message, err){
   }
 }
 
+/* Acceso controlado a datos (evita globals sueltos) */
+const DM = AguaDeMar.data; // Data Manager
+
 /* 3D tilt — sutil, sigue el cursor; respeta reduce-motion y solo en dispositivos con hover */
 const canTilt=matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion:reduce)').matches;
 function tiltify(el){
@@ -41,42 +47,135 @@ function tiltify(el){
 }
 function applyTilt(){ if(!canTilt)return; $$('.card, .feat').forEach(el=>{ if(!el.dataset.tilt){el.dataset.tilt='1';tiltify(el);} }); }
 
-/* =================== STATE =================== */
+/* =================== STATE (mejorado - Opción 2) =================== */
+function findProduct(id){ return DM.products.find(p => p.id === id); }
+
 const SAFE_KEYS = new Set(['id','size','qty']);
+
 const cartReviver = (key, val) => {
   if (key !== '' && !SAFE_KEYS.has(key)) return undefined;
   if (key === '__proto__' || key === 'constructor' || key === 'prototype') return undefined;
   return val;
 };
-let cart = [];
-try {
-  const raw = localStorage.getItem('adm_cart');
-  if (raw) {
-    cart = JSON.parse(raw, cartReviver);
-  }
-} catch(err) {
-  handleError('Tu carrito anterior no se pudo leer correctamente. Se ha reiniciado.', err);
-  cart = [];
-}
 
-if(!Array.isArray(cart)) cart = [];
+// Cart Manager - centralizado, con notificaciones (pub/sub simple)
+const Cart = {
+  items: [],
 
-cart = cart.filter(i =>
-  i &&
-  typeof i.id === 'string' &&
-  typeof i.size === 'string' && i.size.length < 20 &&
-  Number.isInteger(i.qty) && i.qty > 0 && i.qty < 1000 &&
-  findProduct(i.id)
-);
-const saveCart=()=>{
-  try {
-    localStorage.setItem('adm_cart', JSON.stringify(cart));
-  } catch(err) {
-    handleError('No pudimos guardar tu carrito. Verifica el espacio disponible o el modo incógnito.', err);
+  _listeners: [],
+
+  subscribe(fn) {
+    this._listeners.push(fn);
+    return () => {
+      this._listeners = this._listeners.filter(l => l !== fn);
+    };
+  },
+
+  _notify() {
+    this._listeners.forEach(fn => {
+      try { fn(this.items); } catch(e) { handleError('Error en listener del carrito', e); }
+    });
+  },
+
+  load() {
+    try {
+      const raw = localStorage.getItem('adm_cart');
+      let loaded = raw ? JSON.parse(raw, cartReviver) : [];
+      if (!Array.isArray(loaded)) loaded = [];
+
+      this.items = loaded.filter(i =>
+        i &&
+        typeof i.id === 'string' &&
+        typeof i.size === 'string' && i.size.length < 20 &&
+        Number.isInteger(i.qty) && i.qty > 0 && i.qty < 1000 &&
+        DM.products.some(p => p.id === i.id)
+      );
+    } catch(err) {
+      handleError('Tu carrito anterior no se pudo leer correctamente. Se ha reiniciado.', err);
+      this.items = [];
+    }
+  },
+
+  save() {
+    try {
+      localStorage.setItem('adm_cart', JSON.stringify(this.items));
+    } catch(err) {
+      handleError('No pudimos guardar tu carrito. Verifica el espacio disponible o el modo incógnito.', err);
+    }
+  },
+
+  add(id, size, qty = 1) {
+    const ex = this.items.find(i => i.id === id && i.size === size);
+    if (ex) {
+      ex.qty += qty;
+    } else {
+      this.items.push({ id, size, qty });
+    }
+    this.save();
+    this._notify();
+  },
+
+  remove(id, size) {
+    this.items = this.items.filter(i => !(i.id === id && i.size === size));
+    this.save();
+    this._notify();
+  },
+
+  clear() {
+    this.items = [];
+    this.save();
+    this._notify();
+  },
+
+  changeQty(id, size, delta) {
+    const it = this.items.find(i => i.id === id && i.size === size);
+    if (!it) return;
+    it.qty += delta;
+    if (it.qty < 1) {
+      return this.remove(id, size);
+    }
+    this.save();
+    this._notify();
+  },
+
+  count() {
+    return this.items.reduce((s, i) => s + i.qty, 0);
+  },
+
+  subtotal() {
+    return this.items.reduce((s, i) => {
+      const p = findProduct(i.id);
+      return s + (p ? p.price * i.qty : 0);
+    }, 0);
+  },
+
+  getItems() {
+    return this.items;
   }
 };
-let activeFilter='Todo';
-let modalProduct=null, modalSize=null;
+
+// Cargar carrito al inicio
+Cart.load();
+
+// Suscribirse a cambios del carrito para re-render automático (pub/sub simple)
+Cart.subscribe(() => {
+  updateCount();
+  // Solo re-renderizamos el drawer si está abierto (para no forzar DOM innecesario)
+  const drawer = $('#drawer');
+  if (drawer && drawer.classList.contains('open')) {
+    renderCart();
+  }
+});
+
+// Variables de UI (reducidas)
+let activeFilter = 'Todo';
+let modalProduct = null;
+let modalSize = null;
+
+/* Pequeño helper para reducir innerHTML en actualizaciones simples (ejemplo futuro) */
+function setText(el, text) {
+  if (el) el.textContent = text;
+}
 
 /* =================== RENDER CATALOG =================== */
 const cardHTML=p=>`
@@ -103,7 +202,7 @@ const cardHTML=p=>`
 
 function renderCatalog(){
   try {
-    const list=activeFilter==='Todo'?products:products.filter(p=>p.type===activeFilter);
+    const list=activeFilter==='Todo'?DM.products:DM.products.filter(p=>p.type===activeFilter);
     $('#masonry').innerHTML=list.map(cardHTML).join('');
     applyTones($('#masonry'));
     $('#catalogFoot').textContent=`${list.length} ${list.length===1?'pieza':'piezas'}${activeFilter!=='Todo'?' · '+activeFilter:''}`;
@@ -114,23 +213,49 @@ function renderCatalog(){
 }
 
 function renderFilters(){
-  const cats=['Todo',...types.map(t=>t.t)];
+  const cats=['Todo',...DM.types.map(t=>t.t)];
   $('#filters').innerHTML=cats.map(c=>`<button class="chip${c===activeFilter?' active':''}" data-cat="${c}">${c}</button>`).join('');
 }
 
 /* =================== FEATURED =================== */
 function renderFeatured(){
   try {
-    const picks=[products[2],products[11],products[24]];
-    const sizeClasses=['ar-4-5','ar-3-4','ar-3-4'];
-    $('#featured').innerHTML=picks.map((p,i)=>`
-      <div class="feat" data-id="${p.id}">
-        <div class="frame ${sizeClasses[i]}">
-          <div class="ph" data-tone="${p.tone}">${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` : '<span class="ph-word">Foto</span>'}</div>
-        </div>
-        <div class="name">${p.type} ${p.color}</div>
-        <div class="sub">${crc(p.price)}</div>
-      </div>`).join('');
+    const picks = [DM.products[2], DM.products[11], DM.products[24]];
+    const sizeClasses = ['ar-4-5','ar-3-4','ar-3-4'];
+
+    // Imágenes específicas para la Colección Destacada (agregadas por el usuario)
+    const featuredImages = [
+      'assets/images/featured/coleccion-destacada.jpg',
+      'assets/images/featured/destacada-2.jpg',
+      'assets/images/featured/destacada-3.jpg'
+    ];
+
+    $('#featured').innerHTML = picks.map((p, i) => {
+      const imgSrc = featuredImages[i] || (p.image || '');
+      const altText = `Colección Destacada - ${p.type} ${p.color}`;
+      const imgHtml = imgSrc 
+        ? `<img src="${imgSrc}" alt="${altText}" class="prod-img">` 
+        : '<span class="ph-word">Foto</span>';
+
+      const badgeText = i === 0 ? 'Más Vendido' : 'Destacado';
+      const overlayTitle = `${p.type} ${p.color}`;
+
+      return `
+        <div class="feat" data-id="${p.id}">
+          <div class="frame ${sizeClasses[i]}">
+            <div class="ph" data-tone="${p.tone}">
+              ${imgHtml}
+              <span class="feat-badge">${badgeText}</span>
+              <div class="feat-overlay">
+                <span class="feat-overlay-title">${overlayTitle}</span>
+              </div>
+            </div>
+          </div>
+          <div class="name">${p.type} ${p.color}</div>
+          <div class="sub">${crc(p.price)}</div>
+        </div>`;
+    }).join('');
+
     applyTones($('#featured'));
     applyTilt();
   } catch(err) {
@@ -258,7 +383,7 @@ function initCarousel() {
 
 /* =================== FAQ =================== */
 function renderFaq(){
-  $('#faqWrap').innerHTML=faqs.map((f,i)=>`
+  $('#faqWrap').innerHTML=DM.faqs.map((f,i)=>`
     <div class="faq-item" data-i="${i}">
       <button class="faq-q" aria-expanded="false"><span class="faq-q-text">${f.q}</span><i data-lucide="chevron-down" class="faq-icon" aria-hidden="true"></i></button>
       <div class="faq-a"><p>${f.a}</p></div>
@@ -266,39 +391,36 @@ function renderFaq(){
   if(typeof lucide!=='undefined') lucide.createIcons();
 }
 
-/* =================== CART =================== */
-function findProduct(id){return products.find(p=>p.id===id);}
-function cartCountTotal(){return cart.reduce((s,i)=>s+i.qty,0);}
-function cartSubtotal(){return cart.reduce((s,i)=>{const p=findProduct(i.id);return s+(p?p.price*i.qty:0);},0);}
-
+/* =================== CART HELPERS (ahora usan el manager) =================== */
 function bumpCount(){
   const el=$('#cartCount');el.classList.add('bump');setTimeout(()=>el.classList.remove('bump'),300);
 }
-function updateCount(){$('#cartCount').textContent=cartCountTotal();}
+function updateCount(){ setText($('#cartCount'), Cart.count()); }
 
-function addToCart(id,size,qty=1){
+function addToCart(id, size, qty=1){
   try {
-    const ex = cart.find(i => i.id === id && i.size === size);
-    if (ex) {
-      ex.qty += qty;
-    } else {
-      cart.push({id, size, qty});
+    const product = findProduct(id);
+    if (!product) {
+      handleError('Producto no encontrado.');
+      return;
     }
-    saveCart();
-    updateCount();
+    // Validar que la talla exista para ese producto (defensa extra)
+    if (!product.sizes.includes(size)) {
+      handleError('Talla no válida para este producto.');
+      return;
+    }
+    Cart.add(id, size, qty);
     bumpCount();
-    renderCart();
+    // El subscriber de Cart se encarga del updateCount y render condicional
   } catch(err) {
     handleError('No se pudo agregar el producto al carrito.', err);
   }
 }
 
-function removeFromCart(id,size){
+function removeFromCart(id, size){
   try {
-    cart = cart.filter(i => !(i.id === id && i.size === size));
-    saveCart();
-    updateCount();
-    renderCart();
+    Cart.remove(id, size);
+    // subscriber maneja el resto
   } catch(err) {
     handleError('No se pudo quitar el producto.', err);
   }
@@ -306,24 +428,15 @@ function removeFromCart(id,size){
 
 function clearCart(){
   try {
-    cart = [];
-    saveCart();
-    updateCount();
-    renderCart();
+    Cart.clear();
   } catch(err) {
     handleError('No se pudo vaciar el carrito.', err);
   }
 }
 
-function changeQty(id,size,d){
+function changeQty(id, size, d){
   try {
-    const it = cart.find(i => i.id === id && i.size === size);
-    if (!it) return;
-    it.qty += d;
-    if (it.qty < 1) return removeFromCart(id, size);
-    saveCart();
-    updateCount();
-    renderCart();
+    Cart.changeQty(id, size, d);
   } catch(err) {
     handleError('No se pudo cambiar la cantidad.', err);
   }
@@ -332,14 +445,15 @@ function changeQty(id,size,d){
 function renderCart(){
   const body=$('#drawerBody'),foot=$('#drawerFoot');
   try {
-    if(!cart.length){
+    const items = Cart.getItems();
+    if(!items.length){
       body.innerHTML=`<div class="empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
         <div>Tu carrito está vacío.<br>El mar te espera.</div>
       </div>`;
       foot.style.display='none';return;
     }
-    body.innerHTML=cart.map(i=>{
+    body.innerHTML=items.map(i=>{
       const p=findProduct(i.id);if(!p)return'';
       return `<div class="ci">
         <div class="thumb"><div class="ph" data-tone="${p.tone}">${p.image ? `<img src="${p.image}" alt="" class="prod-img">` : ''}</div></div>
@@ -358,7 +472,7 @@ function renderCart(){
       </div>`;
     }).join('');
     applyTones(body);
-    $('#subtotal').textContent=crc(cartSubtotal());
+    $('#subtotal').textContent = crc(Cart.subtotal());
     foot.style.display='block';
   } catch(err) {
     handleError('No se pudo mostrar el carrito.', err);
@@ -377,6 +491,7 @@ const openCart=()=>{
   lastFocus=document.activeElement;
   $('#scrim').classList.add('show');$('#drawer').classList.add('open');
   document.body.style.overflow='hidden';setBgInert(true);
+  renderCart(); // asegurar contenido fresco al abrir
   setTimeout(()=>$('#cartClose').focus(),60);
 };
 const closeCart=()=>{
@@ -488,19 +603,20 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeC
 
 $('#checkout').addEventListener('click',()=>{
   try {
-    if(!cart.length) return;
+    const items = Cart.getItems();
+    if(!items.length) return;
     let msg='¡Hola Agua de Mar! Me interesa este pedido:%0A%0A';
-    cart.forEach(i=>{const p=findProduct(i.id);msg+=`• ${i.qty}× ${p.type} ${p.color} (talla ${encodeURIComponent(i.size)}) — ${crc(p.price*i.qty)}%0A`;});
-    msg+=`%0ASubtotal: ${crc(cartSubtotal())}%0A%0A¿Me ayudan a coordinar pago y envío?`;
-    window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank','noopener,noreferrer');
+    items.forEach(i=>{const p=findProduct(i.id);msg+=`• ${i.qty}× ${p.type} ${p.color} (talla ${encodeURIComponent(i.size)}) — ${crc(p.price*i.qty)}%0A`;});
+    msg+=`%0ASubtotal: ${crc(Cart.subtotal())}%0A%0A¿Me ayudan a coordinar pago y envío?`;
+    window.open(`https://wa.me/${DM.WHATSAPP}?text=${msg}`,'_blank','noopener,noreferrer');
   } catch(err) {
     handleError('No se pudo preparar el mensaje de WhatsApp.', err);
   }
 });
 
 /* enlaces de contacto (footer + botones flotantes) */
-$$('[data-wa-link]').forEach(a=>a.href=`https://wa.me/${WHATSAPP}`);
-$$('[data-ig-link]').forEach(a=>a.href=INSTAGRAM);
+$$('[data-wa-link]').forEach(a=>a.href=`https://wa.me/${DM.WHATSAPP}`);
+$$('[data-ig-link]').forEach(a=>a.href=DM.INSTAGRAM);
 
 $('#news').addEventListener('submit',e=>{
   e.preventDefault();
