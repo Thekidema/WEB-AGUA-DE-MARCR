@@ -1,19 +1,13 @@
-# Dependencias y logs
+# Dependencias y temporales
 node_modules/
-npm-debug.log
-yarn-error.log
-
-# Archivos del sistema
 .DS_Store
 Thumbs.db
-.thumbnail/
-.thumbnail
 
-# Archivos de entorno y secretos
+# Archivos de desarrollo / debug
+*.log
+*.tmp
+screenshots/
+
+# Entornos
 .env
 .env.local
-
-# Carpetas y archivos de respaldo/temporales
-screenshots/
-*backup*
-*.bak

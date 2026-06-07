@@ -46,7 +46,7 @@ for (let idx = 0; idx < PRODUCT_COUNT; idx++) {
     tone: tones[idx % tones.length],
     ratio: ratios[idx % ratios.length],
     desc: descs[idx % descs.length],
-    image: `images/${ty.t.toLowerCase().replaceAll(' ', '-')}-${colorways[idx % colorways.length].toLowerCase().replaceAll(' ', '-')}.jpg`
+    image: `assets/images/products/${ty.t.toLowerCase().replaceAll(' ', '-')}-${colorways[idx % colorways.length].toLowerCase().replaceAll(' ', '-')}.jpg`
   });
 }
 

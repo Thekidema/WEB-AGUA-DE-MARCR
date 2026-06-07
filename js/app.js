@@ -16,6 +16,18 @@ const phNote=(tag,body)=>`<div class="ph-note"><span class="tag">${tag}</span>${
 /* escapa texto antes de inyectarlo en innerHTML (defensa contra storage manipulado) */
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+/* =================== ERROR HANDLING (mejorado) =================== */
+function handleError(message, err){
+  console.error('[AguaDeMar]', message, err || '');
+  // Mostrar mensaje amigable al usuario
+  try {
+    toast(message || 'Ocurrió un error inesperado. Intenta de nuevo.');
+  } catch(e) {
+    // Si toast falla, al menos no rompemos todo
+    alert(message || 'Ocurrió un error. Por favor recarga la página.');
+  }
+}
+
 /* 3D tilt — sutil, sigue el cursor; respeta reduce-motion y solo en dispositivos con hover */
 const canTilt=matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion:reduce)').matches;
 function tiltify(el){
@@ -36,18 +48,33 @@ const cartReviver = (key, val) => {
   if (key === '__proto__' || key === 'constructor' || key === 'prototype') return undefined;
   return val;
 };
-let cart;
-try { cart=JSON.parse(localStorage.getItem('adm_cart')||'[]', cartReviver); }
-catch { cart=[]; }
-if(!Array.isArray(cart)) cart=[];
-cart=cart.filter(i=>
+let cart = [];
+try {
+  const raw = localStorage.getItem('adm_cart');
+  if (raw) {
+    cart = JSON.parse(raw, cartReviver);
+  }
+} catch(err) {
+  handleError('Tu carrito anterior no se pudo leer correctamente. Se ha reiniciado.', err);
+  cart = [];
+}
+
+if(!Array.isArray(cart)) cart = [];
+
+cart = cart.filter(i =>
   i &&
   typeof i.id === 'string' &&
   typeof i.size === 'string' && i.size.length < 20 &&
   Number.isInteger(i.qty) && i.qty > 0 && i.qty < 1000 &&
   findProduct(i.id)
 );
-const saveCart=()=>localStorage.setItem('adm_cart',JSON.stringify(cart));
+const saveCart=()=>{
+  try {
+    localStorage.setItem('adm_cart', JSON.stringify(cart));
+  } catch(err) {
+    handleError('No pudimos guardar tu carrito. Verifica el espacio disponible o el modo incógnito.', err);
+  }
+};
 let activeFilter='Todo';
 let modalProduct=null, modalSize=null;
 
@@ -75,11 +102,15 @@ const cardHTML=p=>`
   </article>`;
 
 function renderCatalog(){
-  const list=activeFilter==='Todo'?products:products.filter(p=>p.type===activeFilter);
-  $('#masonry').innerHTML=list.map(cardHTML).join('');
-  applyTones($('#masonry'));
-  $('#catalogFoot').textContent=`${list.length} ${list.length===1?'pieza':'piezas'}${activeFilter!=='Todo'?' · '+activeFilter:''}`;
-  applyTilt();
+  try {
+    const list=activeFilter==='Todo'?products:products.filter(p=>p.type===activeFilter);
+    $('#masonry').innerHTML=list.map(cardHTML).join('');
+    applyTones($('#masonry'));
+    $('#catalogFoot').textContent=`${list.length} ${list.length===1?'pieza':'piezas'}${activeFilter!=='Todo'?' · '+activeFilter:''}`;
+    applyTilt();
+  } catch(err) {
+    handleError('No se pudo cargar el catálogo.', err);
+  }
 }
 
 function renderFilters(){
@@ -89,28 +120,32 @@ function renderFilters(){
 
 /* =================== FEATURED =================== */
 function renderFeatured(){
-  const picks=[products[2],products[11],products[24]];
-  const sizeClasses=['ar-4-5','ar-3-4','ar-3-4'];
-  $('#featured').innerHTML=picks.map((p,i)=>`
-    <div class="feat" data-id="${p.id}">
-      <div class="frame ${sizeClasses[i]}">
-        <div class="ph" data-tone="${p.tone}">${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` : '<span class="ph-word">Foto</span>'}</div>
-      </div>
-      <div class="name">${p.type} ${p.color}</div>
-      <div class="sub">${crc(p.price)}</div>
-    </div>`).join('');
-  applyTones($('#featured'));
-  applyTilt();
+  try {
+    const picks=[products[2],products[11],products[24]];
+    const sizeClasses=['ar-4-5','ar-3-4','ar-3-4'];
+    $('#featured').innerHTML=picks.map((p,i)=>`
+      <div class="feat" data-id="${p.id}">
+        <div class="frame ${sizeClasses[i]}">
+          <div class="ph" data-tone="${p.tone}">${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` : '<span class="ph-word">Foto</span>'}</div>
+        </div>
+        <div class="name">${p.type} ${p.color}</div>
+        <div class="sub">${crc(p.price)}</div>
+      </div>`).join('');
+    applyTones($('#featured'));
+    applyTilt();
+  } catch(err) {
+    handleError('No se pudo cargar la colección destacada.', err);
+  }
 }
 
 /* =================== CARRUSEL 3D (CLIENTAS) =================== */
 const carouselSlides = [
-  { alt: 'Modelo 1' },
-  { alt: 'Modelo 2' },
-  { alt: 'Modelo 3' },
-  { alt: 'Modelo 4' },
-  { alt: 'Modelo 5' },
+  { src: 'assets/images/clientas/modelo-1.jpg', alt: 'Clienta real usando traje de baño de Agua de Mar' },
+  { src: 'assets/images/clientas/modelo-2.jpg', alt: 'Clienta real usando traje de baño de Agua de Mar' },
+  { src: 'assets/images/clientas/modelo-3.jpg', alt: 'Clienta real usando traje de baño de Agua de Mar' },
 ];
+
+
 
 let carouselIndex = Math.floor(carouselSlides.length / 2);
 let carouselTimer = null;
@@ -149,7 +184,7 @@ function updateCarousel() {
     const isAdjacent = Math.abs(pos) === 1;
 
     slide.style.transform = `
-      translateX(${pos * 55}%)
+      translateX(${pos * 48}%)
       scale(${isCenter ? 1 : isAdjacent ? 0.82 : 0.65})
       rotateY(${pos * -12}deg)
     `;
@@ -242,48 +277,93 @@ function bumpCount(){
 function updateCount(){$('#cartCount').textContent=cartCountTotal();}
 
 function addToCart(id,size,qty=1){
-  const ex=cart.find(i=>i.id===id&&i.size===size);
-  if(ex)ex.qty+=qty;else cart.push({id,size,qty});
-  saveCart();updateCount();bumpCount();renderCart();
+  try {
+    const ex = cart.find(i => i.id === id && i.size === size);
+    if (ex) {
+      ex.qty += qty;
+    } else {
+      cart.push({id, size, qty});
+    }
+    saveCart();
+    updateCount();
+    bumpCount();
+    renderCart();
+  } catch(err) {
+    handleError('No se pudo agregar el producto al carrito.', err);
+  }
 }
-function removeFromCart(id,size){cart=cart.filter(i=>!(i.id===id&&i.size===size));saveCart();updateCount();renderCart();}
-function clearCart(){cart=[];saveCart();updateCount();renderCart();}
+
+function removeFromCart(id,size){
+  try {
+    cart = cart.filter(i => !(i.id === id && i.size === size));
+    saveCart();
+    updateCount();
+    renderCart();
+  } catch(err) {
+    handleError('No se pudo quitar el producto.', err);
+  }
+}
+
+function clearCart(){
+  try {
+    cart = [];
+    saveCart();
+    updateCount();
+    renderCart();
+  } catch(err) {
+    handleError('No se pudo vaciar el carrito.', err);
+  }
+}
+
 function changeQty(id,size,d){
-  const it=cart.find(i=>i.id===id&&i.size===size);if(!it)return;
-  it.qty+=d;if(it.qty<1)return removeFromCart(id,size);
-  saveCart();updateCount();renderCart();
+  try {
+    const it = cart.find(i => i.id === id && i.size === size);
+    if (!it) return;
+    it.qty += d;
+    if (it.qty < 1) return removeFromCart(id, size);
+    saveCart();
+    updateCount();
+    renderCart();
+  } catch(err) {
+    handleError('No se pudo cambiar la cantidad.', err);
+  }
 }
 
 function renderCart(){
   const body=$('#drawerBody'),foot=$('#drawerFoot');
-  if(!cart.length){
-    body.innerHTML=`<div class="empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
-      <div>Tu carrito está vacío.<br>El mar te espera.</div>
-    </div>`;
-    foot.style.display='none';return;
+  try {
+    if(!cart.length){
+      body.innerHTML=`<div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
+        <div>Tu carrito está vacío.<br>El mar te espera.</div>
+      </div>`;
+      foot.style.display='none';return;
+    }
+    body.innerHTML=cart.map(i=>{
+      const p=findProduct(i.id);if(!p)return'';
+      return `<div class="ci">
+        <div class="thumb"><div class="ph" data-tone="${p.tone}">${p.image ? `<img src="${p.image}" alt="" class="prod-img">` : ''}</div></div>
+        <div class="info">
+          <div class="top">
+            <div><div class="nm">${p.type} ${p.color}</div><div class="sz">Talla ${esc(i.size)}</div></div>
+            <div class="pr">${crc(p.price*i.qty)}</div>
+          </div>
+          <div class="stepper">
+            <button data-step="-1" data-id="${i.id}" data-size="${esc(i.size)}" aria-label="Quitar uno">−</button>
+            <span class="q">${i.qty}</span>
+            <button data-step="1" data-id="${i.id}" data-size="${esc(i.size)}" aria-label="Agregar uno">+</button>
+          </div>
+          <button class="rm" data-rm data-id="${i.id}" data-size="${esc(i.size)}">Quitar</button>
+        </div>
+      </div>`;
+    }).join('');
+    applyTones(body);
+    $('#subtotal').textContent=crc(cartSubtotal());
+    foot.style.display='block';
+  } catch(err) {
+    handleError('No se pudo mostrar el carrito.', err);
+    foot.style.display='none';
   }
-  body.innerHTML=cart.map(i=>{
-    const p=findProduct(i.id);if(!p)return'';
-    return `<div class="ci">
-      <div class="thumb"><div class="ph" data-tone="${p.tone}">${p.image ? `<img src="${p.image}" alt="" class="prod-img">` : ''}</div></div>
-      <div class="info">
-        <div class="top">
-          <div><div class="nm">${p.type} ${p.color}</div><div class="sz">Talla ${esc(i.size)}</div></div>
-          <div class="pr">${crc(p.price*i.qty)}</div>
-        </div>
-        <div class="stepper">
-          <button data-step="-1" data-id="${i.id}" data-size="${esc(i.size)}" aria-label="Quitar uno">−</button>
-          <span class="q">${i.qty}</span>
-          <button data-step="1" data-id="${i.id}" data-size="${esc(i.size)}" aria-label="Agregar uno">+</button>
-        </div>
-        <button class="rm" data-rm data-id="${i.id}" data-size="${esc(i.size)}">Quitar</button>
-      </div>
-    </div>`;
-  }).join('');
-  applyTones(body);
-  $('#subtotal').textContent=crc(cartSubtotal());
-  foot.style.display='block';
 }
 
 /* foco / inert: aísla el fondo mientras un diálogo está abierto */
@@ -307,20 +387,31 @@ const closeCart=()=>{
 
 /* =================== MODAL =================== */
 function openModal(id){
-  const p=findProduct(id);if(!p)return;
-  modalProduct=p;modalSize=null;
-  $('#mImg').style.setProperty('--tone',p.tone);
-  $('#mImg').innerHTML=p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` : '<span class="ph-word">Foto</span>';
-  $('#mCat').textContent=p.type;
-  $('#mName').textContent=p.type+' '+p.color;
-  $('#mPrice').textContent=crc(p.price);
-  $('#mDesc').textContent=p.desc;
-  $('#mSizes').innerHTML=p.sizes.map(s=>`<button class="size" data-size="${s}">${s}</button>`).join('');
-  $('#mHint').classList.remove('show');
-  lastFocus=document.activeElement;
-  history.replaceState(null, null, `#producto-${p.id}`);
-  $('#modal').classList.add('show');document.body.style.overflow='hidden';setBgInert(true);
-  setTimeout(()=>$('#modalClose').focus(),60);
+  try {
+    const p = findProduct(id);
+    if (!p) return;
+
+    modalProduct = p;
+    modalSize = null;
+    $('#mImg').style.setProperty('--tone', p.tone);
+    $('#mImg').innerHTML = p.image 
+      ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` 
+      : '<span class="ph-word">Foto</span>';
+    $('#mCat').textContent = p.type;
+    $('#mName').textContent = p.type + ' ' + p.color;
+    $('#mPrice').textContent = crc(p.price);
+    $('#mDesc').textContent = p.desc;
+    $('#mSizes').innerHTML = p.sizes.map(s => `<button class="size" data-size="${s}">${s}</button>`).join('');
+    $('#mHint').classList.remove('show');
+    lastFocus = document.activeElement;
+    history.replaceState(null, null, `#producto-${p.id}`);
+    $('#modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setBgInert(true);
+    setTimeout(() => $('#modalClose').focus(), 60);
+  } catch(err) {
+    handleError('No se pudo abrir el detalle del producto.', err);
+  }
 }
 const closeModal=()=>{
   history.replaceState(null, null, window.location.pathname + window.location.search);
@@ -331,38 +422,52 @@ const closeModal=()=>{
 /* =================== TOAST =================== */
 let toastT;
 function toast(msg){
-  $('#toastMsg').textContent=msg;
-  const t=$('#toast');t.classList.add('show');
-  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);
+  try {
+    const toastEl = $('#toast');
+    const msgEl = $('#toastMsg');
+    if (!toastEl || !msgEl) return;
+
+    msgEl.textContent = msg || 'Ocurrió algo inesperado.';
+    toastEl.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  } catch(e) {
+    // Último recurso
+    console.warn('Toast falló:', msg);
+  }
 }
 
 /* =================== EVENTS =================== */
 document.addEventListener('click',e=>{
-  // filtros
-  const chip=e.target.closest('[data-cat]');
-  if(chip){activeFilter=chip.dataset.cat;renderFilters();renderCatalog();observeReveals();return;}
-  // quick add
-  const q=e.target.closest('[data-quick]');
-  if(q){e.stopPropagation();const p=findProduct(q.dataset.quick);if(!p)return;addToCart(p.id,p.sizes[Math.min(1,p.sizes.length-1)],1);toast('Agregado · '+p.type+' '+p.color);return;}
-  // abrir detalle (card o featured)
-  const card=e.target.closest('.card[data-id], .feat[data-id]');
-  if(card){openModal(card.dataset.id);return;}
-  // tallas en modal
-  const sz=e.target.closest('#mSizes .size');
-  if(sz){$$('#mSizes .size').forEach(b=>b.classList.remove('sel'));sz.classList.add('sel');modalSize=sz.dataset.size;$('#mHint').classList.remove('show');return;}
-  // stepper
-  const step=e.target.closest('[data-step]');
-  if(step){changeQty(step.dataset.id,step.dataset.size,+step.dataset.step);return;}
-  // quitar
-  const rm=e.target.closest('[data-rm]');
-  if(rm){removeFromCart(rm.dataset.id,rm.dataset.size);return;}
-  // faq
-  const fq=e.target.closest('.faq-q');
-  if(fq){
-    const item=fq.parentElement,a=$('.faq-a',item),isOpen=item.classList.contains('open');
-    $$('.faq-item.open').forEach(o=>{o.classList.remove('open');$('.faq-a',o).style.maxHeight=null;$('.faq-q',o).setAttribute('aria-expanded','false');});
-    if(!isOpen){item.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';fq.setAttribute('aria-expanded','true');}
-    return;
+  try {
+    // filtros
+    const chip=e.target.closest('[data-cat]');
+    if(chip){activeFilter=chip.dataset.cat;renderFilters();renderCatalog();observeReveals();return;}
+    // quick add
+    const q=e.target.closest('[data-quick]');
+    if(q){e.stopPropagation();const p=findProduct(q.dataset.quick);if(!p)return;addToCart(p.id,p.sizes[Math.min(1,p.sizes.length-1)],1);toast('Agregado · '+p.type+' '+p.color);return;}
+    // abrir detalle (card o featured)
+    const card=e.target.closest('.card[data-id], .feat[data-id]');
+    if(card){openModal(card.dataset.id);return;}
+    // tallas en modal
+    const sz=e.target.closest('#mSizes .size');
+    if(sz){$$('#mSizes .size').forEach(b=>b.classList.remove('sel'));sz.classList.add('sel');modalSize=sz.dataset.size;$('#mHint').classList.remove('show');return;}
+    // stepper
+    const step=e.target.closest('[data-step]');
+    if(step){changeQty(step.dataset.id,step.dataset.size,+step.dataset.step);return;}
+    // quitar
+    const rm=e.target.closest('[data-rm]');
+    if(rm){removeFromCart(rm.dataset.id,rm.dataset.size);return;}
+    // faq
+    const fq=e.target.closest('.faq-q');
+    if(fq){
+      const item=fq.parentElement,a=$('.faq-a',item),isOpen=item.classList.contains('open');
+      $$('.faq-item.open').forEach(o=>{o.classList.remove('open');$('.faq-a',o).style.maxHeight=null;$('.faq-q',o).setAttribute('aria-expanded','false');});
+      if(!isOpen){item.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';fq.setAttribute('aria-expanded','true');}
+      return;
+    }
+  } catch(err) {
+    handleError('Ocurrió un error al procesar la acción.', err);
   }
 });
 
@@ -382,11 +487,15 @@ $('#modal').addEventListener('click',e=>{if(e.target===$('#modal'))closeModal();
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeCart();$('#mnav').classList.remove('open');}});
 
 $('#checkout').addEventListener('click',()=>{
-  if(!cart.length)return;
-  let msg='¡Hola Agua de Mar! Me interesa este pedido:%0A%0A';
-  cart.forEach(i=>{const p=findProduct(i.id);msg+=`• ${i.qty}× ${p.type} ${p.color} (talla ${encodeURIComponent(i.size)}) — ${crc(p.price*i.qty)}%0A`;});
-  msg+=`%0ASubtotal: ${crc(cartSubtotal())}%0A%0A¿Me ayudan a coordinar pago y envío?`;
-  window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank','noopener,noreferrer');
+  try {
+    if(!cart.length) return;
+    let msg='¡Hola Agua de Mar! Me interesa este pedido:%0A%0A';
+    cart.forEach(i=>{const p=findProduct(i.id);msg+=`• ${i.qty}× ${p.type} ${p.color} (talla ${encodeURIComponent(i.size)}) — ${crc(p.price*i.qty)}%0A`;});
+    msg+=`%0ASubtotal: ${crc(cartSubtotal())}%0A%0A¿Me ayudan a coordinar pago y envío?`;
+    window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank','noopener,noreferrer');
+  } catch(err) {
+    handleError('No se pudo preparar el mensaje de WhatsApp.', err);
+  }
 });
 
 /* enlaces de contacto (footer + botones flotantes) */
@@ -395,10 +504,29 @@ $$('[data-ig-link]').forEach(a=>a.href=INSTAGRAM);
 
 $('#news').addEventListener('submit',e=>{
   e.preventDefault();
-  const form=e.target;
-  fetch(form.action,{method:form.method,body:new FormData(form),headers:{'Accept':'application/json'}})
-  .then(res=>{if(res.ok){form.reset();toast('¡Gracias! Te escribiremos pronto.');}else{toast('Hubo un error. Intenta de nuevo.');}})
-  .catch(()=>toast('Hubo un error de conexión.'));
+  const form = e.target;
+
+  fetch(form.action, {
+    method: form.method,
+    body: new FormData(form),
+    headers: {'Accept': 'application/json'}
+  })
+  .then(res => {
+    if (res.ok) {
+      form.reset();
+      toast('¡Gracias! Te escribiremos pronto.');
+    } else {
+      // Intentamos leer el mensaje de error de Formspree si existe
+      return res.json().catch(() => ({}))
+        .then(data => {
+          const msg = data.error || 'Hubo un problema al enviar el formulario. Intenta de nuevo.';
+          toast(msg);
+        });
+    }
+  })
+  .catch(err => {
+    handleError('Error de conexión. Revisa tu internet e intenta de nuevo.', err);
+  });
 });
 
 // header scroll
@@ -434,12 +562,21 @@ function observeReveals(){
 }
 
 /* =================== INIT =================== */
-renderFilters();renderCatalog();renderFeatured();initCarousel();renderFaq();
-updateCount();renderCart();
-observeReveals();
-if(typeof lucide!=='undefined') lucide.createIcons();
+try {
+  renderFilters();
+  renderCatalog();
+  renderFeatured();
+  initCarousel();
+  renderFaq();
+  updateCount();
+  renderCart();
+  observeReveals();
+  if(typeof lucide!=='undefined') lucide.createIcons();
 
-if(window.location.hash&&window.location.hash.startsWith('#producto-')){
-  const id=window.location.hash.replace('#producto-','');
-  setTimeout(()=>openModal(id), 100);
+  if(window.location.hash && window.location.hash.startsWith('#producto-')){
+    const id = window.location.hash.replace('#producto-','');
+    setTimeout(()=>openModal(id), 100);
+  }
+} catch(err) {
+  handleError('Hubo un problema al cargar la página. Algunas funciones pueden no estar disponibles.', err);
 }

@@ -10,11 +10,11 @@
   <meta property="og:description" content="Trajes de baño hechos para durar. Pensados para el mar de Costa Rica. Hechos a mano en San Carlos." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://aguademar.cr" />
-  <meta property="og:image" content="https://aguademar.cr/assets/logo-mark-ink.png" />
+  <meta property="og:image" content="https://aguademar.cr/assets/images/logos/logo-mark-ink.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Agua de Mar · Beachwear Costa Rica" />
   <meta name="twitter:description" content="Trajes de baño hechos para durar. Pensados para el mar de Costa Rica. Hechos a mano en San Carlos." />
-  <meta name="twitter:image" content="https://aguademar.cr/assets/logo-mark-ink.png" />
+  <meta name="twitter:image" content="https://aguademar.cr/assets/images/logos/logo-mark-ink.png" />
   <meta name="theme-color" content="#FDF8F0" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()" />
@@ -30,9 +30,9 @@
     base-uri 'self';
   " />
   <link rel="canonical" href="https://aguademar.cr/" />
-  <link rel="icon" href="/assets/favicon.ico" sizes="any" />
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+  <link rel="icon" href="/assets/icons/favicon.ico" sizes="any" />
+  <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -52,8 +52,8 @@
   </script>
   <link rel="preload" href="/assets/fonts/cormorant-garamond-600-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/assets/fonts/plus-jakarta-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="css/fonts.css" />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="assets/css/fonts.css" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 
 <body>
@@ -64,8 +64,8 @@
     <div class="container bar">
       <a href="#top" class="brand">
         <span class="brand-marks">
-          <img src="assets/logo-mark-cream.webp" alt="" class="brand-mark mark-light" />
-          <img src="assets/logo-mark-ink.webp" alt="Agua de Mar" class="brand-mark mark-dark" />
+          <img src="assets/images/logos/logo-mark-cream.webp" alt="" class="brand-mark mark-light" />
+          <img src="assets/images/logos/logo-mark-ink.webp" alt="Agua de Mar" class="brand-mark mark-dark" />
         </span>
         <span class="brand-word">Agua de Mar</span>
       </a>
@@ -105,30 +105,30 @@
   <main id="main-content">
     <!-- ================= HERO ================= -->
     <section class="hero">
-    <div class="hero-media">
-      <div class="ph">
-        <div class="ph-note">
-          <span class="tag">Video · Hero</span>
-          modelo <br>ejemplo
+      <div class="hero-media">
+        <video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="assets/images/hero-poster.jpg">
+          <source src="assets/videos/hero.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="container hero-inner">
+        <img src="assets/images/logos/logo-mark-cream.webp" alt="" class="hero-mark reveal" />
+        <h1>Agua de Mar</h1>
+        <p class="sub">Trajes de baño hechos para durar. Pensados para el mar de Costa Rica.</p>
+        <div class="cta-row">
+          <a href="#catalogo" class="btn btn-outline">Ver colección<span class="btn-ico"><svg aria-hidden="true"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M7 17 17 7M9 7h8v8" />
+              </svg></span></a>
         </div>
       </div>
-    </div>
-    <div class="play-pill">
-      <span class="ring"></span>
-    </div>
-    <div class="container hero-inner">
-      <img src="assets/logo-mark-cream.webp" alt="" class="hero-mark reveal" />
-      <h1>Agua de Mar</h1>
-      <p class="sub">Trajes de baño hechos para durar. Pensados para el mar de Costa Rica.</p>
-      <div class="cta-row">
-        <a href="#catalogo" class="btn btn-outline">Ver colección<span class="btn-ico"><svg aria-hidden="true"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M7 17 17 7M9 7h8v8" />
-            </svg></span></a>
+
+      <!-- Scroll indicator elegante -->
+      <div class="hero-scroll" aria-hidden="true">
+        <div class="hero-scroll-line"></div>
+        <span>Deslizá</span>
       </div>
-    </div>
-  </section>
+    </section>
 
   <!-- ================= FILOSOFÍA ================= -->
   <section class="block" id="filosofia">
@@ -146,11 +146,8 @@
           <li><i data-lucide="shield-check"></i>Dura más de una temporada</li>
         </ul>
       </div>
-      <div class="figure ph reveal">
-        <div class="ph-note">
-          <span class="tag">Foto · Filosofía</span>
-          ejemplo / modelo <br>ejemplo
-        </div>
+      <div class="figure reveal">
+        <img src="assets/images/hero-frame.jpg" alt="Mujer en el mar de Costa Rica con traje de baño de Agua de Mar" class="ph-img" style="width:100%;height:100%;object-fit:cover;display:block;">
       </div>
     </div>
   </section>
@@ -239,7 +236,7 @@
     <div class="container">
       <div class="foot-grid">
         <div>
-          <div class="brand"><img src="assets/logo-mark-cream.webp" alt="Agua de Mar" class="foot-mark" /><span
+          <div class="brand"><img src="assets/images/logos/logo-mark-cream.webp" alt="Agua de Mar" class="foot-mark" /><span
               class="brand-word">Agua de Mar</span></div>
           <p class="foot-tag">Beachwear honesto, hecho en Costa Rica para durar más que una temporada.</p>
         </div>
