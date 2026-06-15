@@ -19,20 +19,15 @@ const phNote=(tag,body)=>`<div class="ph-note"><span class="tag">${tag}</span>${
 /* escapa texto antes de inyectarlo en innerHTML (defensa contra storage manipulado) */
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* =================== ERROR HANDLING (mejorado) =================== */
+/* =================== ERROR HANDLING =================== */
 function handleError(message, err){
   console.error('[AguaDeMar]', message, err || '');
-  // Mostrar mensaje amigable al usuario
   try {
     toast(message || 'Ocurrió un error inesperado. Intenta de nuevo.');
-  } catch(e) {
-    // Si toast falla, al menos no rompemos todo
-    alert(message || 'Ocurrió un error. Por favor recarga la página.');
-  }
+  } catch(e) { /* noop */ }
 }
 
-/* Acceso controlado a datos (evita globals sueltos) */
-const DM = AguaDeMar.data; // Data Manager
+const DM = AguaDeMar.data;
 
 /* 3D tilt — sutil, sigue el cursor; respeta reduce-motion y solo en dispositivos con hover */
 const canTilt=matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -47,7 +42,7 @@ function tiltify(el){
 }
 function applyTilt(){ if(!canTilt)return; $$('.card, .feat').forEach(el=>{ if(!el.dataset.tilt){el.dataset.tilt='1';tiltify(el);} }); }
 
-/* =================== STATE (mejorado - Opción 2) =================== */
+/* =================== STATE =================== */
 function findProduct(id){ return DM.products.find(p => p.id === id); }
 
 const SAFE_KEYS = new Set(['id','size','qty']);
@@ -149,43 +144,29 @@ const Cart = {
     }, 0);
   },
 
-  getItems() {
-    return this.items;
-  }
 };
 
-// Cargar carrito al inicio
 Cart.load();
 
-// Suscribirse a cambios del carrito para re-render automático (pub/sub simple)
 Cart.subscribe(() => {
   updateCount();
-  // Solo re-renderizamos el drawer si está abierto (para no forzar DOM innecesario)
   const drawer = $('#drawer');
-  if (drawer && drawer.classList.contains('open')) {
-    renderCart();
-  }
+  if (drawer && drawer.classList.contains('open')) renderCart();
 });
 
-// Variables de UI (reducidas)
 let activeFilter = 'Todo';
 let modalProduct = null;
 let modalSize = null;
 
-/* Pequeño helper para reducir innerHTML en actualizaciones simples (ejemplo futuro) */
-function setText(el, text) {
-  if (el) el.textContent = text;
-}
-
 /* =================== RENDER CATALOG =================== */
-const cardHTML=p=>`
+const cardHTML=(p,i)=>`
   <article class="card" data-id="${p.id}">
     <div class="frame">
-      <div class="ph ph-img" data-tone="${p.tone}">
+      <div class="ph" data-tone="${p.tone}">
         ${p.image ? `<img src="${p.image}" alt="${p.type} ${p.color}" class="prod-img">` : '<span class="ph-word">Foto</span>'}
       </div>
       <div class="overlay">
-        <span class="see">Ver detalle →</span>
+        <span class="card-num">N°${String(i+1).padStart(2,'0')}</span>
         <button class="quick-add" data-quick="${p.id}" aria-label="Agregar rápido ${p.type} ${p.color}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         </button>
@@ -203,7 +184,7 @@ const cardHTML=p=>`
 function renderCatalog(){
   try {
     const list=activeFilter==='Todo'?DM.products:DM.products.filter(p=>p.type===activeFilter);
-    $('#masonry').innerHTML=list.map(cardHTML).join('');
+    $('#masonry').innerHTML=list.map((p,i)=>cardHTML(p,i)).join('');
     applyTones($('#masonry'));
     $('#catalogFoot').textContent=`${list.length} ${list.length===1?'pieza':'piezas'}${activeFilter!=='Todo'?' · '+activeFilter:''}`;
     applyTilt();
@@ -379,8 +360,6 @@ function initCarousel() {
   startCarouselAutoplay();
 }
 
-/* (clientas gallery replaced by carousel above) */
-
 /* =================== FAQ =================== */
 function renderFaq(){
   $('#faqWrap').innerHTML=DM.faqs.map((f,i)=>`
@@ -391,27 +370,19 @@ function renderFaq(){
   if(typeof lucide!=='undefined') lucide.createIcons();
 }
 
-/* =================== CART HELPERS (ahora usan el manager) =================== */
+/* =================== CART HELPERS =================== */
 function bumpCount(){
   const el=$('#cartCount');el.classList.add('bump');setTimeout(()=>el.classList.remove('bump'),300);
 }
-function updateCount(){ setText($('#cartCount'), Cart.count()); }
+function updateCount(){ const el=$('#cartCount'); if(el) el.textContent=Cart.count(); }
 
 function addToCart(id, size, qty=1){
   try {
     const product = findProduct(id);
-    if (!product) {
-      handleError('Producto no encontrado.');
-      return;
-    }
-    // Validar que la talla exista para ese producto (defensa extra)
-    if (!product.sizes.includes(size)) {
-      handleError('Talla no válida para este producto.');
-      return;
-    }
+    if (!product) { handleError('Producto no encontrado.'); return; }
+    if (!product.sizes.includes(size)) { handleError('Talla no válida para este producto.'); return; }
     Cart.add(id, size, qty);
     bumpCount();
-    // El subscriber de Cart se encarga del updateCount y render condicional
   } catch(err) {
     handleError('No se pudo agregar el producto al carrito.', err);
   }
@@ -445,7 +416,7 @@ function changeQty(id, size, d){
 function renderCart(){
   const body=$('#drawerBody'),foot=$('#drawerFoot');
   try {
-    const items = Cart.getItems();
+    const items = Cart.items;
     if(!items.length){
       body.innerHTML=`<div class="empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
@@ -480,7 +451,7 @@ function renderCart(){
   }
 }
 
-/* foco / inert: aísla el fondo mientras un diálogo está abierto */
+/* aísla el fondo mientras un diálogo está abierto — previene scroll y foco en elementos ocultos */
 let lastFocus=null;
 function setBgInert(on){
   $$('header, .mnav, section, footer, .fab-stack').forEach(el=>{
@@ -603,7 +574,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeC
 
 $('#checkout').addEventListener('click',()=>{
   try {
-    const items = Cart.getItems();
+    const items = Cart.items;
     if(!items.length) return;
     let msg='¡Hola Agua de Mar! Me interesa este pedido:%0A%0A';
     items.forEach(i=>{const p=findProduct(i.id);msg+=`• ${i.qty}× ${p.type} ${p.color} (talla ${encodeURIComponent(i.size)}) — ${crc(p.price*i.qty)}%0A`;});
@@ -614,7 +585,6 @@ $('#checkout').addEventListener('click',()=>{
   }
 });
 
-/* enlaces de contacto (footer + botones flotantes) */
 $$('[data-wa-link]').forEach(a=>a.href=`https://wa.me/${DM.WHATSAPP}`);
 $$('[data-ig-link]').forEach(a=>a.href=DM.INSTAGRAM);
 
