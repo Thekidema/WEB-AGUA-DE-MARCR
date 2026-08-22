@@ -1,0 +1,126 @@
+const crypto = require('crypto');
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const rateLimit = require('express-rate-limit');
+const { COOKIE_NAME, signAdminToken, cookieOptions, requireAdmin } = require('../middleware/auth');
+const db = require('../db');
+const { serializeProduct } = require('../productSerializer');
+const { upload, deleteUploadedImage } = require('../upload');
+
+const router = express.Router();
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Probá de nuevo en unos minutos.' },
+});
+
+/* multer envuelto para responder JSON en vez de la página HTML de error por default */
+function handleImageUpload(req, res, next) {
+  upload.single('image')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message || 'Error al subir la imagen' });
+    next();
+  });
+}
+
+function validateProductFields(body) {
+  const errors = [];
+  const { type, color, tone, desc } = body;
+  const price = Number(body.price);
+  let sizes;
+  try {
+    sizes = JSON.parse(body.sizes);
+  } catch (e) {
+    sizes = null;
+  }
+
+  if (!type || typeof type !== 'string') errors.push('type es requerido');
+  if (!color || typeof color !== 'string') errors.push('color es requerido');
+  if (!tone || typeof tone !== 'string') errors.push('tone es requerido');
+  if (!desc || typeof desc !== 'string') errors.push('desc es requerido');
+  if (!Number.isInteger(price) || price <= 0) errors.push('price debe ser un entero positivo');
+  if (!Array.isArray(sizes) || sizes.length === 0 || !sizes.every((s) => typeof s === 'string')) {
+    errors.push('sizes debe ser un array JSON de strings, no vacío');
+  }
+
+  return { errors, type, color, tone, desc, price, sizes };
+}
+
+router.post('/login', loginLimiter, express.json(), (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
+  }
+  const validUser = username === process.env.ADMIN_USERNAME;
+  const validPass = validUser && bcrypt.compareSync(password, process.env.ADMIN_PASSWORD_HASH || '');
+  if (!validUser || !validPass) {
+    return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+  }
+  const token = signAdminToken(username);
+  res.cookie(COOKIE_NAME, token, cookieOptions());
+  res.json({ username });
+});
+
+router.post('/logout', (req, res) => {
+  res.clearCookie(COOKIE_NAME, { path: '/' });
+  res.json({ ok: true });
+});
+
+router.get('/session', requireAdmin, (req, res) => {
+  res.json({ username: req.admin.sub });
+});
+
+router.post('/products', requireAdmin, handleImageUpload, (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'La imagen es requerida' });
+
+  const { errors, type, color, tone, desc, price, sizes } = validateProductFields(req.body);
+  if (errors.length) {
+    deleteUploadedImage(req.file.filename);
+    return res.status(400).json({ error: errors.join(', ') });
+  }
+
+  const id = crypto.randomUUID();
+  db.prepare(
+    `INSERT INTO products (id, type, color, price, sizes, tone, desc, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(id, type, color, price, JSON.stringify(sizes), tone, desc, req.file.filename);
+
+  const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  res.status(201).json(serializeProduct(row));
+});
+
+router.put('/products/:id', requireAdmin, handleImageUpload, (req, res) => {
+  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  if (!existing) {
+    if (req.file) deleteUploadedImage(req.file.filename);
+    return res.status(404).json({ error: 'Producto no encontrado' });
+  }
+
+  const { errors, type, color, tone, desc, price, sizes } = validateProductFields(req.body);
+  if (errors.length) {
+    if (req.file) deleteUploadedImage(req.file.filename);
+    return res.status(400).json({ error: errors.join(', ') });
+  }
+
+  const image = req.file ? req.file.filename : existing.image;
+  db.prepare(
+    `UPDATE products SET type=?, color=?, price=?, sizes=?, tone=?, desc=?, image=? WHERE id=?`
+  ).run(type, color, price, JSON.stringify(sizes), tone, desc, image, req.params.id);
+
+  if (req.file) deleteUploadedImage(existing.image);
+
+  const row = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  res.json(serializeProduct(row));
+});
+
+router.delete('/products/:id', requireAdmin, (req, res) => {
+  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
+
+  db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
+  deleteUploadedImage(existing.image);
+  res.json({ ok: true });
+});
+
+module.exports = router;

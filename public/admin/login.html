@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Admin · Agua de Mar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/fonts.css">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+  <main class="admin-auth">
+    <form id="loginForm" class="admin-card" autocomplete="on">
+      <h1>Agua de Mar</h1>
+      <p class="admin-sub">Panel de administrador</p>
+      <label>
+        Usuario
+        <input type="text" name="username" autocomplete="username" required autofocus>
+      </label>
+      <label>
+        Contraseña
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="btn btn-solid admin-btn-full">Entrar</button>
+    </form>
+  </main>
+
+  <div class="toast" id="toast">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M5 12l5 5L20 7" />
+    </svg>
+    <span id="toastMsg">Agregado al carrito</span>
+  </div>
+
+  <script src="js/admin-common.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

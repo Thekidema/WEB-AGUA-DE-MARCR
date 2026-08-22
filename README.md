@@ -1,56 +1,60 @@
 # Agua de Mar · Beachwear Costa Rica
 
-Sitio web estático para la marca de trajes de baño hechos a mano en Costa Rica.
+Sitio web con panel de administrador para la marca de trajes de baño hechos a mano en Costa Rica. Backend Node.js + Express + SQLite; el sitio público y el panel admin son HTML/JS vanilla (sin build step).
 
 ## Estructura del proyecto
 
 ```
 .
-├── index.html                 # Página principal
-├── _headers                   # Configuración para hosting (Netlify)
-├── README.md
-├── js/
-│   ├── app.js                 # Lógica de interfaz (carrito, modal, carrusel, etc.)
-│   └── data.js                # Datos del catálogo y configuración
-└── assets/
-    ├── css/
-    │   ├── fonts.css          # Tipografías auto-hospedadas
-    │   └── styles.css         # Estilos principales del sitio
-    ├── fonts/                 # Archivos de fuente .woff2
-    ├── images/
-    │   ├── clientas/          # Fotos reales de clientas (carrusel)
-    │   │   ├── modelo-1.jpg
-    │   │   ├── modelo-2.jpg
-    │   │   └── modelo-3.jpg
-    │   ├── hero-frame.jpg     # Imagen de la sección Filosofía
-    │   ├── hero-poster.jpg    # Poster del video del hero
-    │   └── logos/             # Marcas de logo
-    │       ├── logo-mark-cream.webp
-    │       ├── logo-mark-ink.png
-    │       └── logo-mark-ink.webp
-    ├── icons/                 # Favicon y assets de iconos
-    │   ├── apple-touch-icon.png
-    │   ├── favicon.ico
-    │   └── favicon.svg
-    └── videos/
-        └── hero.mp4           # Video principal del hero (10s, 1080p alta calidad)
+├── package.json
+├── .env.example                # copiar a .env y completar
+├── data/                        # aguademar.sqlite (gitignored)
+├── server/
+│   ├── index.js                 # Express: helmet, static, rutas, listen
+│   ├── db.js                    # better-sqlite3, crea la tabla al arrancar
+│   ├── upload.js                # multer: subida de imágenes de producto
+│   ├── productSerializer.js
+│   ├── middleware/
+│   │   ├── auth.js              # JWT en cookie httpOnly
+│   │   └── security.js          # helmet + CSP + Permissions-Policy
+│   ├── routes/
+│   │   ├── products.js          # GET /api/products (pública)
+│   │   └── admin.js             # login/logout/session + CRUD productos
+│   └── scripts/
+│       └── create-admin.js      # genera el hash de la contraseña admin
+└── public/                      # raíz estática servida por Express
+    ├── index.html
+    ├── js/{app.js, data.js}
+    ├── assets/...
+    └── admin/                   # panel de administrador
+        ├── login.html
+        ├── dashboard.html
+        └── js/{admin-common.js, login.js, dashboard.js}
 ```
-
-## Notas
-
-- El catálogo actualmente usa placeholders (no hay fotos de productos reales aún). Las rutas están preparadas en `assets/images/products/`.
-- El carrusel de clientas usa las 3 imágenes en `assets/images/clientas/`.
-- El video del hero está optimizado en `assets/videos/hero.mp4`.
-- Estructura pensada para ser simple, limpia y fácil de mantener.
-- Se agregó `.gitignore` básico.
 
 ## Desarrollo local
 
-Abrir `index.html` directamente en el navegador o servir con un servidor estático simple:
-
 ```bash
-python3 -m http.server 8000
+npm install
+cp .env.example .env
+# generar JWT_SECRET:
+openssl rand -hex 32
+# generar ADMIN_PASSWORD_HASH (pide usuario y contraseña por CLI):
+npm run create-admin
+# pegar los valores generados en .env
+
+npm run dev
 ```
+
+Sitio público: http://localhost:3000
+Panel admin: http://localhost:3000/admin/login.html
+
+## Notas
+
+- El catálogo se administra 100% desde el panel — no hay productos de ejemplo, la base arranca vacía.
+- Las imágenes de producto subidas desde el panel se guardan en `public/assets/images/products/` (gitignored, contenido de la clienta).
+- CSP y demás headers de seguridad se configuran en `server/middleware/security.js` (antes vivían en `_headers` de Netlify y en un `<meta>` de `index.html`; ambos se eliminaron al migrar a un servidor Node real).
+- Para producción (Railway/Render): montar un volumen persistente y apuntar `DB_PATH`/`UPLOADS_DIR` ahí — de lo contrario la base de datos y las fotos se pierden en cada redeploy.
 
 ## Licencia
 

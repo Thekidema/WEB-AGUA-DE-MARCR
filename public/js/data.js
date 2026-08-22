@@ -5,6 +5,10 @@
 
    Todo se expone bajo AguaDeMar.data para reducir contaminación
    del scope global y hacer el código más mantenible a futuro.
+
+   `products` arranca vacío; app.js lo puebla con fetch('/api/products').
+   Este mismo archivo también lo carga el panel admin (public/admin/)
+   para poblar los <select> de type/color/tone del formulario.
    ============================================================ */
 
 window.AguaDeMar = window.AguaDeMar || {};
@@ -26,7 +30,6 @@ AguaDeMar.data = {
   ],
 
   tones: ['#EDE3D3', '#E7DECF', '#E2E7E1', '#EAE0D0', '#E5E2DA', '#DDE4DF', '#EFE6D7', '#E3DCCD', '#E8E2D5', '#DEE5E2'],
-  ratios: [0.78, 0.82, 1, 0.72, 0.88, 0.75, 0.9, 0.8],
   descs: [
     'Corte clásico de tiro medio, soporte real sin renunciar a la comodidad. Forro doble que no transparenta.',
     'Tela compresiva de secado rápido. Se siente como segunda piel y aguanta brazada tras brazada.',
@@ -49,22 +52,3 @@ AguaDeMar.data = {
     { q: '¿Cómo cuido mi traje de baño?', a: 'Enjuagá con agua dulce después de cada uso, lavá a mano con jabón neutro y secá a la sombra. Evitá la secadora y el contacto prolongado con superficies rugosas. Así te dura años.' },
   ]
 };
-
-/* Generar catálogo */
-const d = AguaDeMar.data;
-const PRODUCT_COUNT = 40;
-for (let idx = 0; idx < PRODUCT_COUNT; idx++) {
-  const ty = d.types[idx % d.types.length];
-  const priceJitter = (idx % 5) * 1000 - 2000;
-  d.products.push({
-    id: 'p' + idx,
-    type: ty.t,
-    color: d.colorways[idx % d.colorways.length],
-    price: ty.base + priceJitter,
-    sizes: ty.sizes,
-    tone: d.tones[idx % d.tones.length],
-    ratio: d.ratios[idx % d.ratios.length],
-    desc: d.descs[idx % d.descs.length],
-    image: `assets/images/products/${ty.t.toLowerCase().replaceAll(' ', '-')}-${d.colorways[idx % d.colorways.length].toLowerCase().replaceAll(' ', '-')}.jpg`
-  });
-}

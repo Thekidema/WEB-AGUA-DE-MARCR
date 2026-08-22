@@ -11,3 +11,9 @@ screenshots/
 # Entornos
 .env
 .env.local
+
+# Base de datos y subidas del admin (contenido de la clienta, no del repo)
+data/*.sqlite
+data/*.sqlite-*
+public/assets/images/products/*
+!public/assets/images/products/.gitkeep

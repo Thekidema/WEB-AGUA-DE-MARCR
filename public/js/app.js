@@ -154,9 +154,6 @@ const Cart = {
   }
 };
 
-// Cargar carrito al inicio
-Cart.load();
-
 // Suscribirse a cambios del carrito para re-render automático (pub/sub simple)
 Cart.subscribe(() => {
   updateCount();
@@ -220,7 +217,8 @@ function renderFilters(){
 /* =================== FEATURED =================== */
 function renderFeatured(){
   try {
-    const picks = [DM.products[2], DM.products[11], DM.products[24]];
+    const picks = DM.products.slice(0, 3);
+    if(!picks.length){ $('#featured').innerHTML=''; return; }
     const sizeClasses = ['ar-4-5','ar-3-4','ar-3-4'];
 
     // Imágenes específicas para la Colección Destacada (agregadas por el usuario)
@@ -678,21 +676,34 @@ function observeReveals(){
 }
 
 /* =================== INIT =================== */
-try {
-  renderFilters();
-  renderCatalog();
-  renderFeatured();
-  initCarousel();
-  renderFaq();
-  updateCount();
-  renderCart();
-  observeReveals();
-  if(typeof lucide!=='undefined') lucide.createIcons();
-
-  if(window.location.hash && window.location.hash.startsWith('#producto-')){
-    const id = window.location.hash.replace('#producto-','');
-    setTimeout(()=>openModal(id), 100);
+async function init(){
+  try {
+    const res = await fetch('/api/products');
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    DM.products = await res.json();
+  } catch(err) {
+    handleError('No se pudo cargar el catálogo. Intenta de nuevo más tarde.', err);
+    DM.products = [];
   }
-} catch(err) {
-  handleError('Hubo un problema al cargar la página. Algunas funciones pueden no estar disponibles.', err);
+
+  try {
+    Cart.load();
+    renderFilters();
+    renderCatalog();
+    renderFeatured();
+    initCarousel();
+    renderFaq();
+    updateCount();
+    renderCart();
+    observeReveals();
+    if(typeof lucide!=='undefined') lucide.createIcons();
+
+    if(window.location.hash && window.location.hash.startsWith('#producto-')){
+      const id = window.location.hash.replace('#producto-','');
+      setTimeout(()=>openModal(id), 100);
+    }
+  } catch(err) {
+    handleError('Hubo un problema al cargar la página. Algunas funciones pueden no estar disponibles.', err);
+  }
 }
+init();
