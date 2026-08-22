@@ -88,7 +88,7 @@ function selectedSizes() {
 /* ===== Cargar y renderizar productos ===== */
 async function loadProducts() {
   try {
-    const res = await fetch('/api/products');
+    const res = await adminFetch('/api/admin/products');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     products = await res.json();
     renderTable();
@@ -97,17 +97,27 @@ async function loadProducts() {
   }
 }
 
+function toggleSwitch(id, field, checked, label) {
+  return `
+    <label class="admin-toggle" title="${esc(label)}">
+      <input type="checkbox" data-toggle="${field}" data-id="${id}" ${checked ? 'checked' : ''}>
+      <span class="admin-toggle-track"><span class="admin-toggle-thumb"></span></span>
+    </label>`;
+}
+
 function renderTable() {
   const body = $('#productsBody');
   $('#emptyState').hidden = products.length > 0;
   body.innerHTML = products
     .map(
       (p) => `
-    <tr data-id="${p.id}">
+    <tr data-id="${p.id}" class="${p.active ? '' : 'admin-row-inactive'}">
       <td><img class="admin-thumb" src="${p.image}" alt="" onerror="this.style.visibility='hidden'"></td>
       <td>${esc(p.type)} ${esc(p.color)}</td>
       <td>${crc(p.price)}</td>
       <td>${p.sizes.map(esc).join(', ')}</td>
+      <td>${toggleSwitch(p.id, 'active', p.active, 'Visible en el catálogo público')}</td>
+      <td>${toggleSwitch(p.id, 'featured', p.featured, 'Aparece en Colección Destacada')}</td>
       <td class="admin-row-actions">
         <button type="button" class="btn btn-ghost" data-edit="${p.id}">Editar</button>
         <button type="button" class="btn btn-ghost" data-del="${p.id}">Borrar</button>
@@ -116,6 +126,27 @@ function renderTable() {
     )
     .join('');
 }
+
+document.addEventListener('change', async (e) => {
+  const toggle = e.target.closest('[data-toggle]');
+  if (!toggle) return;
+  const { toggle: field, id } = toggle.dataset;
+  try {
+    const res = await adminFetch(`/api/admin/products/${id}/${field}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value: toggle.checked }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const updated = await res.json();
+    const idx = products.findIndex((p) => p.id === id);
+    if (idx !== -1) products[idx] = updated;
+    renderTable();
+  } catch (err) {
+    toggle.checked = !toggle.checked;
+    handleError('No se pudo actualizar el producto.', err);
+  }
+});
 
 document.addEventListener('click', async (e) => {
   const editBtn = e.target.closest('[data-edit]');

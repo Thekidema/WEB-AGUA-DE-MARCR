@@ -199,19 +199,12 @@ function renderFilters(){
 /* =================== FEATURED =================== */
 function renderFeatured(){
   try {
-    const picks = DM.products.slice(0, 3);
+    const picks = DM.products.filter(p => p.featured).slice(0, 3);
     if(!picks.length){ $('#featured').innerHTML=''; return; }
     const sizeClasses = ['ar-4-5','ar-3-4','ar-3-4'];
 
-    // Imágenes específicas para la Colección Destacada (agregadas por el usuario)
-    const featuredImages = [
-      'assets/images/featured/coleccion-destacada.jpg',
-      'assets/images/featured/destacada-2.jpg',
-      'assets/images/featured/destacada-3.jpg'
-    ];
-
     $('#featured').innerHTML = picks.map((p, i) => {
-      const imgSrc = featuredImages[i] || (p.image || '');
+      const imgSrc = p.image || '';
       const altText = `Colección Destacada - ${p.type} ${p.color}`;
       const imgHtml = imgSrc 
         ? `<img src="${imgSrc}" alt="${altText}" class="prod-img">` 

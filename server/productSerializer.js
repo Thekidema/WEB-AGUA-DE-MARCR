@@ -8,6 +8,8 @@ function serializeProduct(row) {
     tone: row.tone,
     desc: row.desc,
     image: `/assets/images/products/${row.image}`,
+    active: !!row.active,
+    featured: !!row.featured,
   };
 }
 

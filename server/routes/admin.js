@@ -72,6 +72,11 @@ router.get('/session', requireAdmin, (req, res) => {
   res.json({ username: req.admin.sub });
 });
 
+router.get('/products', requireAdmin, (req, res) => {
+  const rows = db.prepare('SELECT * FROM products ORDER BY created_at DESC').all();
+  res.json(rows.map(serializeProduct));
+});
+
 router.post('/products', requireAdmin, handleImageUpload, (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'La imagen es requerida' });
 
@@ -122,5 +127,21 @@ router.delete('/products/:id', requireAdmin, (req, res) => {
   deleteUploadedImage(existing.image);
   res.json({ ok: true });
 });
+
+function togglePatch(column) {
+  return (req, res) => {
+    const existing = db.prepare('SELECT id FROM products WHERE id = ?').get(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
+    if (typeof req.body.value !== 'boolean') {
+      return res.status(400).json({ error: 'value debe ser boolean' });
+    }
+    db.prepare(`UPDATE products SET ${column} = ? WHERE id = ?`).run(req.body.value ? 1 : 0, req.params.id);
+    const row = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+    res.json(serializeProduct(row));
+  };
+}
+
+router.patch('/products/:id/active', requireAdmin, express.json(), togglePatch('active'));
+router.patch('/products/:id/featured', requireAdmin, express.json(), togglePatch('featured'));
 
 module.exports = router;

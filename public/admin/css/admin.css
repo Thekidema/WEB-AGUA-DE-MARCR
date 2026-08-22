@@ -150,6 +150,30 @@
 .admin-table tr:last-child td { border-bottom: none; }
 .admin-table tbody tr { transition: background-color .12s var(--ease-out, ease-out); }
 .admin-table tbody tr:hover { background: var(--bg); }
+.admin-table tbody tr.admin-row-inactive { opacity: .5; }
+
+/* ----- toggle switch (activo / destacado) ----- */
+.admin-toggle { display: inline-flex; cursor: pointer; }
+.admin-toggle input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.admin-toggle-track {
+  width: 38px; height: 22px;
+  background: var(--line-strong);
+  border-radius: 999px;
+  position: relative;
+  transition: background-color .15s var(--ease-out, ease-out);
+}
+.admin-toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(42,42,42,.25);
+  transition: transform .15s var(--ease-out, ease-out);
+}
+.admin-toggle input:checked + .admin-toggle-track { background: var(--green); }
+.admin-toggle input:checked + .admin-toggle-track .admin-toggle-thumb { transform: translateX(16px); }
+.admin-toggle input:focus-visible + .admin-toggle-track { box-shadow: 0 0 0 3px rgba(47, 107, 94, 0.25); }
 
 .admin-thumb {
   width: 44px;

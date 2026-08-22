@@ -22,4 +22,14 @@ db.exec(`
   );
 `);
 
+/* migración idempotente: ALTER TABLE ADD COLUMN falla si la columna ya existe,
+   así que se chequea PRAGMA table_info antes — seguro de correr en cada arranque */
+const productCols = db.prepare("PRAGMA table_info(products)").all().map((c) => c.name);
+if (!productCols.includes('active')) {
+  db.exec('ALTER TABLE products ADD COLUMN active INTEGER NOT NULL DEFAULT 1');
+}
+if (!productCols.includes('featured')) {
+  db.exec('ALTER TABLE products ADD COLUMN featured INTEGER NOT NULL DEFAULT 0');
+}
+
 module.exports = db;
