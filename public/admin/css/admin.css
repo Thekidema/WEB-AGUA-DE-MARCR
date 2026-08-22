@@ -4,6 +4,10 @@
    de assets/css/styles.css (--bg, --ink, --btn, .toast, etc).
    ============================================================ */
 
+/* styles.css define reglas por tag (img, header) que ganan por origen
+   de cascade al [hidden] por defecto del navegador — se restaura acá */
+[hidden] { display: none !important; }
+
 .admin-body {
   background: var(--bg);
   color: var(--ink);
@@ -78,14 +82,21 @@
 }
 
 /* ===== Dashboard ===== */
+/* reset explícito: styles.css define `header { position:fixed; z-index:60; color:#fff; ... }`
+   para el nav del sitio público, y como .admin-topbar también es un <header> lo hereda
+   sin querer, quedando flotando invisible sobre el contenido */
 .admin-topbar {
+  position: static;
+  z-index: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-5) var(--space-7);
   border-bottom: 1px solid var(--line);
   background: #fff;
+  color: var(--ink);
 }
+.admin-topbar::before { content: none; }
 
 .admin-topbar h1 {
   font-family: var(--display);
