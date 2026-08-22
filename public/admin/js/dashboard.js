@@ -10,16 +10,54 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
+/* referencia visual aproximada para el preview en vivo del <select> de color de tela
+   (no es un dato del producto, solo ayuda a elegir mirando el color en vez del nombre) */
+const COLOR_HEX = {
+  'Coral': '#C85C44', 'Turquesa': '#2AA9A0', 'Terracota': '#B5651D', 'Verde oliva': '#708238',
+  'Negro': '#1A1A1A', 'Arena': '#C2A878', 'Mostaza': '#C9A227', 'Vino': '#6B2737',
+  'Marfil': '#F0E6D2', 'Aguamarina': '#4FD9C4', 'Rosa palo': '#D9A0A0', 'Cobalto': '#1E4B9E',
+};
+
 let products = [];
 let editingId = null;
 
 /* ===== Selects estáticos (type/color/tone) ===== */
 function populateStaticSelects() {
   $('#typeSelect').innerHTML = DM.types.map((t) => `<option value="${esc(t.t)}">${esc(t.t)}</option>`).join('');
-  $('select[name=color]').innerHTML = DM.colorways.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  $('#colorSelect').innerHTML = DM.colorways.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
   $('#toneSelect').innerHTML = DM.tones.map((t) => `<option value="${t}">${t}</option>`).join('');
   renderSizeChips();
+  updateColorSwatch();
+  updateToneSwatch();
 }
+
+function updateColorSwatch() {
+  const name = $('#colorSelect').value;
+  $('#colorSwatch').style.background = COLOR_HEX[name] || 'transparent';
+}
+function updateToneSwatch() {
+  $('#toneSwatch').style.background = $('#toneSelect').value;
+}
+$('#colorSelect').addEventListener('change', updateColorSwatch);
+$('#toneSelect').addEventListener('change', updateToneSwatch);
+
+/* ===== Precio: formateo en vivo con separador de miles (estilo ₡ CR: puntos) ===== */
+function formatThousands(digits) {
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function rawPriceValue() {
+  return Number($('#priceInput').value.replace(/\./g, '')) || 0;
+}
+$('#priceInput').addEventListener('input', (e) => {
+  const digits = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  e.target.value = digits ? formatThousands(digits) : '';
+});
+
+/* ===== Foto: mostrar nombre del archivo elegido ===== */
+$('#imageInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  $('#imageFileName').textContent = file ? file.name : 'Ningún archivo elegido';
+});
 
 function renderSizeChips(selected = []) {
   const type = $('#typeSelect').value;
@@ -107,10 +145,11 @@ function openModal(product) {
 
   const currentImage = $('#currentImage');
   const currentImageHint = $('#currentImageHint');
+  $('#imageFileName').textContent = 'Ningún archivo elegido';
   if (product) {
     $('#typeSelect').value = product.type;
-    form.color.value = product.color;
-    form.price.value = product.price;
+    $('#colorSelect').value = product.color;
+    $('#priceInput').value = formatThousands(String(product.price));
     $('#toneSelect').value = product.tone;
     form.desc.value = product.desc;
     renderSizeChips(product.sizes);
@@ -124,6 +163,8 @@ function openModal(product) {
     currentImageHint.hidden = true;
     $('#imageInput').required = true;
   }
+  updateColorSwatch();
+  updateToneSwatch();
   $('#modalScrim').classList.add('show');
 }
 
@@ -152,11 +193,16 @@ $('#productForm').addEventListener('submit', async (e) => {
     toast('Elegí una foto para el producto.');
     return;
   }
+  const price = rawPriceValue();
+  if (!price) {
+    toast('Ingresá un precio válido.');
+    return;
+  }
 
   const formData = new FormData();
   formData.set('type', $('#typeSelect').value);
-  formData.set('color', form.color.value);
-  formData.set('price', form.price.value);
+  formData.set('color', $('#colorSelect').value);
+  formData.set('price', price);
   formData.set('sizes', JSON.stringify(sizes));
   formData.set('tone', $('#toneSelect').value);
   formData.set('desc', form.desc.value);

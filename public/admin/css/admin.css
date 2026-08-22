@@ -120,8 +120,9 @@
 .admin-table-wrap {
   background: #fff;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
+  box-shadow: 0 2px 14px rgba(42, 42, 42, 0.04);
 }
 
 .admin-table {
@@ -147,6 +148,8 @@
 }
 
 .admin-table tr:last-child td { border-bottom: none; }
+.admin-table tbody tr { transition: background-color .12s var(--ease-out, ease-out); }
+.admin-table tbody tr:hover { background: var(--bg); }
 
 .admin-thumb {
   width: 44px;
@@ -172,7 +175,8 @@
 .admin-modal-scrim {
   position: fixed;
   inset: 0;
-  background: rgba(42, 42, 42, 0.45);
+  background: rgba(42, 42, 42, 0.5);
+  backdrop-filter: blur(3px);
   display: none;
   align-items: center;
   justify-content: center;
@@ -180,61 +184,234 @@
   z-index: 50;
 }
 
-.admin-modal-scrim.show { display: flex; }
+.admin-modal-scrim.show { display: flex; animation: admin-scrim-in .2s var(--ease-out, ease-out); }
 
 .admin-modal {
   background: #fff;
-  border-radius: 14px;
-  padding: var(--space-7);
+  border-radius: 18px;
+  padding: var(--space-8) var(--space-7) var(--space-7);
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 24px 70px -20px rgba(42, 42, 42, 0.35);
+  animation: admin-modal-in .25s cubic-bezier(.2,.8,.2,1);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-modal-scrim.show, .admin-modal { animation: none; }
+}
+
+@keyframes admin-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes admin-modal-in {
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.admin-modal-head { margin-bottom: var(--space-6); }
 
 .admin-modal h2 {
   font-family: var(--display);
-  font-size: 22px;
-  margin: 0 0 var(--space-5);
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
 }
+
+.admin-modal-sub {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  margin: 4px 0 0;
+}
+
+/* ----- campos: layout ----- */
+.admin-field { margin-bottom: var(--space-5); }
+.admin-field:last-child { margin-bottom: 0; }
 
 .admin-field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.admin-field-row .admin-field { margin-bottom: 0; }
+
+.admin-field label,
+.admin-modal-actions ~ label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  margin-bottom: 7px;
 }
 
+/* ----- controles de formulario (inputs/selects/textarea del modal) ----- */
+.admin-modal input[type="text"],
+.admin-modal input[type="number"],
+.admin-modal select,
+.admin-modal textarea {
+  display: block;
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
+  font-family: var(--body);
+  font-size: 14.5px;
+  color: var(--ink);
+  background: var(--bg);
+  transition: border-color .15s var(--ease-out, ease-out), box-shadow .15s var(--ease-out, ease-out);
+}
+
+.admin-modal textarea { resize: vertical; min-height: 72px; }
+
+.admin-modal input:focus-visible,
+.admin-modal select:focus-visible,
+.admin-modal textarea:focus-visible {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(47, 107, 94, 0.18);
+}
+
+/* ----- preview en vivo de color / tono ----- */
+.admin-swatch-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.admin-swatch-dot {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);
+  box-shadow: inset 0 0 0 3px #fff;
+  transition: background-color .15s var(--ease-out, ease-out);
+}
+
+.admin-swatch-field select { flex: 1; }
+
+/* ----- precio con prefijo ₡ ----- */
+.admin-price-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-price-currency {
+  position: absolute;
+  left: 13px;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  pointer-events: none;
+}
+
+.admin-price-field input {
+  padding-left: 30px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- tallas ----- */
 .admin-sizes {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .admin-size-chip {
-  border: 1px solid var(--line-strong);
+  border: 1.5px solid var(--line-strong);
   border-radius: 999px;
-  padding: 5px 12px;
+  padding: 7px 14px;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   user-select: none;
+  transition: background-color .15s var(--ease-out, ease-out), border-color .15s var(--ease-out, ease-out), color .15s var(--ease-out, ease-out), transform .1s var(--ease-out, ease-out);
+}
+.admin-size-chip:hover { border-color: var(--green); }
+.admin-size-chip:active { transform: scale(.96); }
+.admin-size-chip input { display: none; }
+.admin-size-chip.sel { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* ----- subida de foto ----- */
+.admin-upload {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 12px;
+  background: var(--bg);
 }
 
-.admin-size-chip input { display: none; }
-.admin-size-chip.sel { background: var(--ink); color: #fff; border-color: var(--ink); }
+.admin-current-image {
+  flex: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+}
+
+.admin-upload-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-upload-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+.admin-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .15s var(--ease-out, ease-out), color .15s var(--ease-out, ease-out);
+}
+.admin-upload-btn:hover { background: var(--ink); color: #fff; }
+
+.admin-upload-input:focus-visible + .admin-upload-btn,
+.admin-upload-btn:has(+ input:focus-visible) {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(47, 107, 94, 0.25);
+}
+
+.admin-upload-name {
+  font-size: 13px;
+  color: var(--ink);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-upload-hint {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.admin-field-hint { margin: var(--space-2) 0 0; }
 
 .admin-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
-  margin-top: var(--space-6);
-}
-
-.admin-current-image {
-  width: 72px;
-  height: 72px;
-  border-radius: 8px;
-  object-fit: cover;
-  margin-top: var(--space-2);
-  background: var(--bg-2);
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line-soft);
 }

@@ -41,43 +41,68 @@
 
   <div class="admin-modal-scrim" id="modalScrim">
     <div class="admin-modal">
-      <h2 id="modalTitle">Agregar producto</h2>
+      <div class="admin-modal-head">
+        <h2 id="modalTitle">Agregar producto</h2>
+        <p class="admin-modal-sub">Los cambios se publican al instante en el catálogo.</p>
+      </div>
       <form id="productForm">
         <input type="hidden" name="id">
+
         <div class="admin-field-row">
-          <label>
-            Tipo
+          <div class="admin-field">
+            <label for="typeSelect">Tipo</label>
             <select name="type" id="typeSelect" required></select>
-          </label>
-          <label>
-            Color
-            <select name="color" required></select>
-          </label>
+          </div>
+          <div class="admin-field">
+            <label for="colorSelect">Color</label>
+            <div class="admin-swatch-field">
+              <span class="admin-swatch-dot" id="colorSwatch" aria-hidden="true"></span>
+              <select name="color" id="colorSelect" required></select>
+            </div>
+          </div>
         </div>
+
         <div class="admin-field-row">
-          <label>
-            Precio (₡)
-            <input type="number" name="price" min="1" step="1" required>
-          </label>
-          <label>
-            Tono de fondo
-            <select name="tone" id="toneSelect" required></select>
-          </label>
+          <div class="admin-field">
+            <label for="priceInput">Precio</label>
+            <div class="admin-price-field">
+              <span class="admin-price-currency" aria-hidden="true">₡</span>
+              <input type="text" inputmode="numeric" id="priceInput" name="price" required placeholder="0" autocomplete="off">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label for="toneSelect">Tono de fondo</label>
+            <div class="admin-swatch-field">
+              <span class="admin-swatch-dot" id="toneSwatch" aria-hidden="true"></span>
+              <select name="tone" id="toneSelect" required></select>
+            </div>
+          </div>
         </div>
-        <label>
-          Tallas disponibles
+
+        <div class="admin-field">
+          <label>Tallas disponibles</label>
           <div class="admin-sizes" id="sizesWrap"></div>
-        </label>
-        <label>
-          Descripción
-          <textarea name="desc" rows="3" required></textarea>
-        </label>
-        <label>
-          Foto (JPEG, PNG o WebP, máx. 8MB)
-          <input type="file" name="image" id="imageInput" accept="image/jpeg,image/png,image/webp">
-        </label>
-        <img id="currentImage" class="admin-current-image" hidden alt="Foto actual">
-        <p class="admin-sub" id="currentImageHint" hidden style="margin:4px 0 0">Dejá el campo vacío para conservar esta foto.</p>
+        </div>
+
+        <div class="admin-field">
+          <label for="descInput">Descripción</label>
+          <textarea name="desc" id="descInput" rows="3" required placeholder="Corte, tela, caída, detalles..."></textarea>
+        </div>
+
+        <div class="admin-field">
+          <label for="imageInput">Foto del producto</label>
+          <div class="admin-upload">
+            <img id="currentImage" class="admin-current-image" hidden alt="Foto actual">
+            <div class="admin-upload-body">
+              <label class="admin-upload-btn" for="imageInput">Elegir archivo</label>
+              <input type="file" name="image" id="imageInput" accept="image/jpeg,image/png,image/webp" class="admin-upload-input">
+              <span class="admin-upload-name" id="imageFileName">Ningún archivo elegido</span>
+              <span class="admin-upload-hint">JPEG, PNG o WebP · máx. 8MB</span>
+            </div>
+          </div>
+          <p class="admin-sub admin-field-hint" id="currentImageHint" hidden>Dejá el campo vacío para conservar la foto actual.</p>
+        </div>
+
         <div class="admin-modal-actions">
           <button type="button" class="btn btn-ghost" id="cancelBtn">Cancelar</button>
           <button type="submit" class="btn btn-solid">Guardar</button>
