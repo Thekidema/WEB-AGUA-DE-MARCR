@@ -9,9 +9,12 @@ const router = express.Router();
 router.get('/', (req, res) => {
   const rows = db.prepare("SELECT key, value FROM settings WHERE key IN ('whatsapp', 'instagram')").all();
   const settings = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  const faqs = db.prepare('SELECT question, answer FROM faqs ORDER BY sort_order ASC, created_at ASC').all();
+
   res.json({
     whatsapp: settings.whatsapp || '',
     instagram: settings.instagram || '',
+    faqs,
   });
 });
 

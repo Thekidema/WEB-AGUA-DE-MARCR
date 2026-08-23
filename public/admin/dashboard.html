@@ -18,6 +18,7 @@
 
   <nav class="admin-tabs">
     <button type="button" class="admin-tab-btn active" data-tab="productos">Productos</button>
+    <button type="button" class="admin-tab-btn" data-tab="faq">FAQ</button>
     <button type="button" class="admin-tab-btn" data-tab="config">Configuración</button>
   </nav>
 
@@ -44,6 +45,26 @@
           <tbody id="productsBody"></tbody>
         </table>
         <div id="emptyState" class="admin-empty" hidden>Todavía no hay productos. Agregá el primero.</div>
+      </div>
+    </section>
+
+    <section id="tab-faq" class="admin-tab-panel" hidden>
+      <div class="admin-toolbar">
+        <div class="admin-sub" style="margin:0">Preguntas frecuentes del sitio, en el orden en que se muestran.</div>
+        <button type="button" class="btn btn-solid" id="newFaqBtn">+ Agregar pregunta</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Orden</th>
+              <th>Pregunta</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="faqsBody"></tbody>
+        </table>
+        <div id="faqEmptyState" class="admin-empty" hidden>Todavía no hay preguntas. Agregá la primera.</div>
       </div>
     </section>
 
@@ -141,6 +162,34 @@
     </div>
   </div>
 
+  <div class="admin-modal-scrim" id="faqModalScrim">
+    <div class="admin-modal">
+      <div class="admin-modal-head">
+        <h2 id="faqModalTitle">Agregar pregunta</h2>
+      </div>
+      <form id="faqForm">
+        <input type="hidden" name="id">
+        <div class="admin-field">
+          <label for="faqQuestionInput">Pregunta</label>
+          <input type="text" id="faqQuestionInput" name="question" required placeholder="¿Cómo elijo mi talla?">
+        </div>
+        <div class="admin-field">
+          <label for="faqAnswerInput">Respuesta</label>
+          <textarea id="faqAnswerInput" name="answer" rows="4" required placeholder="Respuesta completa..."></textarea>
+        </div>
+        <div class="admin-field">
+          <label for="faqOrderInput">Orden</label>
+          <input type="number" id="faqOrderInput" name="sort_order" value="0" min="0" step="1">
+          <p class="admin-sub admin-field-hint">Las preguntas se muestran de menor a mayor.</p>
+        </div>
+        <div class="admin-modal-actions">
+          <button type="button" class="btn btn-ghost" id="faqCancelBtn">Cancelar</button>
+          <button type="submit" class="btn btn-solid">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="toast" id="toast">
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M5 12l5 5L20 7" />
@@ -153,5 +202,6 @@
   <script src="js/tabs.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/settings.js"></script>
+  <script src="js/faqs.js"></script>
 </body>
 </html>

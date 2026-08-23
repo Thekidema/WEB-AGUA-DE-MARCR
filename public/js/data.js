@@ -44,11 +44,5 @@ AguaDeMar.data = {
     { who: 'Valeria C.', loc: 'Guanacaste', tone: '#E2E7E1' },
     { who: 'Daniela M.', loc: 'Limón', tone: '#EAE0D0' },
   ],
-  faqs: [
-    { q: '¿Cómo elijo mi talla?', a: 'Cada pieza incluye una tabla de medidas en centímetros. Si estás entre dos tallas, escribinos por WhatsApp con tus medidas y te recomendamos la mejor opción. Nuestras telas tienen buena recuperación, así que ceden lo justo sin deformarse.' },
-    { q: '¿Hacen envíos a todo el país?', a: 'Sí. Enviamos a toda Costa Rica con entrega de 2 a 4 días hábiles. En el GAM coordinamos entrega exprés. El costo de envío se calcula al finalizar tu pedido por WhatsApp.' },
-    { q: '¿Puedo cambiar o devolver una prenda?', a: 'Tenés 15 días para cambios siempre que la prenda esté sin uso, con etiquetas y forro higiénico intacto. Por higiene, no aceptamos devoluciones de bottoms una vez retirado el forro.' },
-    { q: '¿De qué está hecha la tela?', a: 'Trabajamos con un tejido de poliamida reciclada y elastano, resistente al cloro, al agua salada y al protector solar. Es de secado rápido y mantiene el color estación tras estación.' },
-    { q: '¿Cómo cuido mi traje de baño?', a: 'Enjuagá con agua dulce después de cada uso, lavá a mano con jabón neutro y secá a la sombra. Evitá la secadora y el contacto prolongado con superficies rugosas. Así te dura años.' },
-  ]
+  faqs: [], // se puebla vía fetch('/api/site-content') en app.js
 };

@@ -169,4 +169,47 @@ router.put('/settings', requireAdmin, express.json(), (req, res) => {
   res.json({ whatsapp, instagram });
 });
 
+/* ===== FAQ ===== */
+router.get('/faqs', requireAdmin, (req, res) => {
+  const rows = db.prepare('SELECT * FROM faqs ORDER BY sort_order ASC, created_at ASC').all();
+  res.json(rows);
+});
+
+function validateFaqFields(body) {
+  const errors = [];
+  const question = (body.question || '').trim();
+  const answer = (body.answer || '').trim();
+  const sortOrder = Number.isInteger(Number(body.sort_order)) ? Number(body.sort_order) : 0;
+  if (!question) errors.push('question es requerido');
+  if (!answer) errors.push('answer es requerido');
+  return { errors, question, answer, sortOrder };
+}
+
+router.post('/faqs', requireAdmin, express.json(), (req, res) => {
+  const { errors, question, answer, sortOrder } = validateFaqFields(req.body);
+  if (errors.length) return res.status(400).json({ error: errors.join(', ') });
+
+  const id = crypto.randomUUID();
+  db.prepare('INSERT INTO faqs (id, question, answer, sort_order) VALUES (?, ?, ?, ?)').run(id, question, answer, sortOrder);
+  res.status(201).json(db.prepare('SELECT * FROM faqs WHERE id = ?').get(id));
+});
+
+router.put('/faqs/:id', requireAdmin, express.json(), (req, res) => {
+  const existing = db.prepare('SELECT id FROM faqs WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'FAQ no encontrada' });
+
+  const { errors, question, answer, sortOrder } = validateFaqFields(req.body);
+  if (errors.length) return res.status(400).json({ error: errors.join(', ') });
+
+  db.prepare('UPDATE faqs SET question=?, answer=?, sort_order=? WHERE id=?').run(question, answer, sortOrder, req.params.id);
+  res.json(db.prepare('SELECT * FROM faqs WHERE id = ?').get(req.params.id));
+});
+
+router.delete('/faqs/:id', requireAdmin, (req, res) => {
+  const existing = db.prepare('SELECT id FROM faqs WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'FAQ no encontrada' });
+  db.prepare('DELETE FROM faqs WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
 module.exports = router;

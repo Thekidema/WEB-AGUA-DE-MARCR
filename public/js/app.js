@@ -356,8 +356,8 @@ function initCarousel() {
 function renderFaq(){
   $('#faqWrap').innerHTML=DM.faqs.map((f,i)=>`
     <div class="faq-item" data-i="${i}">
-      <button class="faq-q" aria-expanded="false"><span class="faq-q-text">${f.q}</span><i data-lucide="chevron-down" class="faq-icon" aria-hidden="true"></i></button>
-      <div class="faq-a"><p>${f.a}</p></div>
+      <button class="faq-q" aria-expanded="false"><span class="faq-q-text">${esc(f.question)}</span><i data-lucide="chevron-down" class="faq-icon" aria-hidden="true"></i></button>
+      <div class="faq-a"><p>${esc(f.answer)}</p></div>
     </div>`).join('');
   if(typeof lucide!=='undefined') lucide.createIcons();
 }
@@ -653,6 +653,7 @@ async function init(){
   if (siteContentResult.status === 'fulfilled') {
     DM.WHATSAPP = siteContentResult.value.whatsapp || DM.WHATSAPP;
     DM.INSTAGRAM = siteContentResult.value.instagram || DM.INSTAGRAM;
+    DM.faqs = siteContentResult.value.faqs || DM.faqs;
   } else {
     console.warn('[AguaDeMar] No se pudo cargar la configuración del sitio, usando valores por defecto.', siteContentResult.reason);
   }
