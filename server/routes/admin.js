@@ -9,6 +9,7 @@ const { upload, deleteUploadedImage } = require('../upload');
 const { asyncHandler } = require('../asyncHandler');
 
 const router = express.Router();
+const R2_PUBLIC_URL = (process.env.R2_PUBLIC_URL || '').replace(/\/$/, '');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -237,7 +238,7 @@ router.get('/orders/stats', requireAdmin, asyncHandler(async (req, res) => {
   const withImage = [];
   for (const r of ranked) {
     const product = await db.get('SELECT image FROM products WHERE id = ?', r.id);
-    withImage.push({ ...r, image: product ? `/assets/images/products/${product.image}` : null });
+    withImage.push({ ...r, image: product ? `${R2_PUBLIC_URL}/${product.image}` : null });
   }
   res.json(withImage);
 }));

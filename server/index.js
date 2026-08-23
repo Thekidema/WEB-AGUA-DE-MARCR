@@ -8,7 +8,6 @@ const productsRouter = require('./routes/products');
 const adminRouter = require('./routes/admin');
 const siteContentRouter = require('./routes/siteContent');
 const ordersRouter = require('./routes/orders');
-const { UPLOADS_DIR } = require('./upload');
 
 const app = express();
 
@@ -28,9 +27,6 @@ app.use('/api/admin', adminRouter);
 app.use('/api/site-content', siteContentRouter);
 app.use('/api/orders', ordersRouter);
 
-/* servido aparte de express.static(public): así UPLOADS_DIR puede apuntar
-   a un volumen persistente fuera de public/ sin perder las imágenes */
-app.use('/assets/images/products', express.static(UPLOADS_DIR));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 /* handler de error global — atrapa cualquier excepción que llegue vía

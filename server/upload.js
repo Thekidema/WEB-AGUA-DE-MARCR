@@ -1,27 +1,23 @@
-const path = require('path');
-const fs = require('fs');
 const crypto = require('crypto');
 const multer = require('multer');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 
-const UPLOADS_DIR = process.env.UPLOADS_DIR
-  ? path.resolve(process.cwd(), process.env.UPLOADS_DIR)
-  : path.join(__dirname, '..', 'public', 'assets', 'images', 'products');
+const BUCKET = process.env.R2_BUCKET_NAME;
 
-fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+const s3 = new S3Client({
+  region: 'auto',
+  endpoint: process.env.R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
 
 const EXT_BY_MIME = {
   'image/jpeg': '.jpg',
   'image/png': '.png',
   'image/webp': '.webp',
 };
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
-  filename: (req, file, cb) => {
-    const ext = EXT_BY_MIME[file.mimetype];
-    cb(null, crypto.randomUUID() + ext);
-  },
-});
 
 function fileFilter(req, file, cb) {
   if (!EXT_BY_MIME[file.mimetype]) {
@@ -30,17 +26,49 @@ function fileFilter(req, file, cb) {
   cb(null, true);
 }
 
-const upload = multer({
-  storage,
+const multerUpload = multer({
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: { fileSize: 8 * 1024 * 1024 },
 });
 
-function deleteUploadedImage(filename) {
+/* multer deja el archivo en memoria (req.file.buffer); acá lo subimos a R2
+   y dejamos req.file.filename con la key generada, para que el resto del
+   código (admin.js) siga viendo la misma forma de req.file que tenía con
+   el disco local — no necesita saber que la imagen ahora vive en R2. */
+const upload = {
+  single(fieldName) {
+    const middleware = multerUpload.single(fieldName);
+    return (req, res, next) => {
+      middleware(req, res, async (err) => {
+        if (err) return next(err);
+        if (!req.file) return next();
+        try {
+          const key = crypto.randomUUID() + EXT_BY_MIME[req.file.mimetype];
+          await s3.send(new PutObjectCommand({
+            Bucket: BUCKET,
+            Key: key,
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype,
+          }));
+          req.file.filename = key;
+          next();
+        } catch (uploadErr) {
+          console.error('Error subiendo imagen a R2', uploadErr);
+          next(new Error('No se pudo subir la imagen. Intentá de nuevo en unos segundos.'));
+        }
+      });
+    };
+  },
+};
+
+async function deleteUploadedImage(filename) {
   if (!filename) return;
-  fs.unlink(path.join(UPLOADS_DIR, filename), (err) => {
-    if (err && err.code !== 'ENOENT') console.error('No se pudo borrar imagen', filename, err);
-  });
+  try {
+    await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: filename }));
+  } catch (err) {
+    console.error('No se pudo borrar imagen de R2', filename, err);
+  }
 }
 
-module.exports = { upload, deleteUploadedImage, UPLOADS_DIR };
+module.exports = { upload, deleteUploadedImage };
