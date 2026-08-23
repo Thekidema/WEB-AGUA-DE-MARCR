@@ -9,6 +9,7 @@ document.querySelectorAll('.admin-tab-btn').forEach((btn) => {
     document.querySelectorAll('.admin-tab-panel').forEach((p) => { p.hidden = true; });
 
     btn.classList.add('active');
+    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     const panel = document.getElementById('tab-' + btn.dataset.tab);
     if (panel) panel.hidden = false;
   });

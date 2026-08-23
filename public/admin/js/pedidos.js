@@ -68,9 +68,9 @@
         const date = new Date(o.created_at.replace(' ', 'T') + 'Z').toLocaleString('es-CR', { dateStyle: 'short', timeStyle: 'short' });
         return `
           <tr>
-            <td>${date}</td>
-            <td>${summary}</td>
-            <td>${crcP(subtotal)}</td>
+            <td data-label="Fecha">${date}</td>
+            <td class="admin-cell-title">${summary}</td>
+            <td data-label="Subtotal">${crcP(subtotal)}</td>
           </tr>`;
       })
       .join('');

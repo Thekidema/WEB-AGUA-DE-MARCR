@@ -112,13 +112,13 @@ function renderTable() {
     .map(
       (p) => `
     <tr data-id="${p.id}" class="${p.active ? '' : 'admin-row-inactive'}">
-      <td><img class="admin-thumb" src="${p.image}" alt="" onerror="this.style.visibility='hidden'"></td>
-      <td>${esc(p.type)} ${esc(p.color)}</td>
-      <td>${crc(p.price)}</td>
-      <td>${p.sizes.map(esc).join(', ')}</td>
-      <td>${toggleSwitch(p.id, 'active', p.active, 'Visible en el catálogo público')}</td>
-      <td>${toggleSwitch(p.id, 'featured', p.featured, 'Aparece en Colección Destacada')}</td>
-      <td class="admin-row-actions">
+      <td class="admin-cell-media"><img class="admin-thumb" src="${p.image}" alt="" onerror="this.style.visibility='hidden'"></td>
+      <td class="admin-cell-title">${esc(p.type)} ${esc(p.color)}</td>
+      <td data-label="Precio">${crc(p.price)}</td>
+      <td data-label="Tallas">${p.sizes.map(esc).join(', ')}</td>
+      <td data-label="Visible">${toggleSwitch(p.id, 'active', p.active, 'Visible en el catálogo público')}</td>
+      <td data-label="Destacado">${toggleSwitch(p.id, 'featured', p.featured, 'Aparece en Colección Destacada')}</td>
+      <td class="admin-row-actions admin-cell-actions">
         <button type="button" class="btn btn-ghost" data-edit="${p.id}">Editar</button>
         <button type="button" class="btn btn-ghost" data-del="${p.id}">Borrar</button>
       </td>

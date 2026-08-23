@@ -30,9 +30,9 @@
       .map(
         (f) => `
       <tr data-id="${f.id}">
-        <td>${f.sort_order}</td>
-        <td>${escFaq(f.question)}</td>
-        <td class="admin-row-actions">
+        <td data-label="Orden">${f.sort_order}</td>
+        <td class="admin-cell-title">${escFaq(f.question)}</td>
+        <td class="admin-row-actions admin-cell-actions">
           <button type="button" class="btn btn-ghost" data-faq-edit="${f.id}">Editar</button>
           <button type="button" class="btn btn-ghost" data-faq-del="${f.id}">Borrar</button>
         </td>

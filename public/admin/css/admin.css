@@ -59,20 +59,22 @@
   display: block;
   width: 100%;
   margin-top: 6px;
-  padding: 10px 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
   font-family: var(--body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink);
   background: var(--bg);
+  transition: border-color .15s var(--ease-out, ease-out), box-shadow .15s var(--ease-out, ease-out);
 }
 
-.admin-card input:focus,
-.admin-card select:focus,
-.admin-card textarea:focus {
-  outline: 2px solid var(--green);
-  outline-offset: 1px;
+.admin-card input:focus-visible,
+.admin-card select:focus-visible,
+.admin-card textarea:focus-visible {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(47, 107, 94, 0.18);
 }
 
 .admin-btn-full {
@@ -182,7 +184,14 @@
 .admin-table tbody tr.admin-row-inactive { opacity: .5; }
 
 /* ----- toggle switch (activo / destacado) ----- */
-.admin-toggle { display: inline-flex; cursor: pointer; }
+.admin-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+}
 .admin-toggle input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
 .admin-toggle-track {
   width: 38px; height: 22px;
@@ -216,6 +225,15 @@
 .admin-row-actions {
   display: flex;
   gap: var(--space-2);
+}
+
+/* .btn base (styles.css) está pensado para CTAs sueltos del sitio público
+   (height:50px, pill grande) — dentro de una fila de tabla se ve sobredimensionado */
+.admin-row-actions .btn {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 13px;
+  border-radius: 10px;
 }
 
 .admin-empty {
@@ -310,7 +328,7 @@
   border: 1.5px solid var(--line-strong);
   border-radius: 10px;
   font-family: var(--body);
-  font-size: 14.5px;
+  font-size: 16px;
   color: var(--ink);
   background: var(--bg);
   transition: border-color .15s var(--ease-out, ease-out), box-shadow .15s var(--ease-out, ease-out);
@@ -531,4 +549,203 @@
   font-size: 13px;
   color: var(--ink);
   text-align: right;
+}
+
+/* ============================================================
+   Responsive — panel admin
+   Desktop >900px sin cambios de layout (solo los fixes de
+   .admin-row-actions/.admin-toggle de arriba, que aplican siempre).
+   ============================================================ */
+
+/* ----- tablet (641–900px): la tabla sigue siendo <table>, scroll
+   horizontal en vez de squish — a este ancho todavía entra razonable ----- */
+@media (max-width: 900px) {
+  .admin-main { padding: var(--space-6) var(--space-5); }
+  .admin-tabs { padding: var(--space-3) var(--space-5) 0; }
+
+  .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table th,
+  .admin-table td { white-space: nowrap; }
+}
+
+/* ----- teléfono (≤640px): topbar, tabs, toolbar ----- */
+@media (max-width: 640px) {
+  .admin-topbar {
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+  .admin-topbar h1 {
+    font-size: 16px;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .admin-topbar .btn {
+    flex: none;
+    height: 44px;
+    padding: 0 16px;
+    font-size: 13px;
+  }
+
+  .admin-tabs {
+    padding: var(--space-3) var(--space-4) 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-tab-btn {
+    flex: none;
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .admin-main { padding: var(--space-5) var(--space-4); }
+
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+  .admin-toolbar .btn { width: 100%; }
+
+  .admin-card { padding: var(--space-6) var(--space-5); }
+}
+
+/* ----- teléfono (≤640px): tabla → tarjeta (patrón genérico,
+   cubre Productos/FAQ/Pedidos) ----- */
+@media (max-width: 640px) {
+  .admin-table-wrap { background: transparent; border: none; box-shadow: none; }
+  .admin-table thead { display: none; }
+  .admin-table, .admin-table tbody, .admin-table tr, .admin-table td { display: block; width: 100%; }
+
+  .admin-table tbody tr {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    box-shadow: 0 2px 10px rgba(42, 42, 42, .04);
+  }
+  .admin-table tbody tr:last-child { margin-bottom: 0; }
+  .admin-table tbody tr:hover { background: #fff; }
+  .admin-table tbody tr.admin-row-inactive { opacity: .55; }
+
+  .admin-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--line-soft);
+    white-space: normal;
+  }
+  .admin-table td:last-child { border-bottom: none; }
+  .admin-table td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+    flex: none;
+  }
+  .admin-table td:not([data-label])::before { content: none; }
+
+  /* celda "título" (nombre de producto / pregunta / resumen de pedido):
+     sin label, actúa como encabezado de la card */
+  .admin-table td.admin-cell-title {
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 600;
+    border-bottom: none;
+    padding-top: 0;
+    padding-bottom: var(--space-2);
+  }
+
+  /* celda de acciones: sin label, botones a ancho completo */
+  .admin-table td.admin-cell-actions {
+    border-bottom: none;
+    padding-top: var(--space-3);
+    gap: var(--space-2);
+  }
+  .admin-table td.admin-cell-actions .btn { flex: 1; height: 44px; }
+}
+
+/* ----- teléfono (≤640px): layout específico de la card de Productos
+   (única con imagen + 2 toggles). grid-column/grid-row explícitos,
+   nunca `order`, para no desalinear el orden de tab/foco del DOM ----- */
+@media (max-width: 640px) {
+  .admin-table--products tbody tr {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    row-gap: var(--space-2);
+    column-gap: var(--space-3);
+  }
+  .admin-table--products td { display: block; border-bottom: none; padding: 0; }
+  .admin-table--products td::before { display: block; margin-bottom: 2px; }
+
+  .admin-table--products td.admin-cell-media { grid-column: 1; grid-row: 1 / span 2; }
+  .admin-table--products td.admin-cell-media .admin-thumb { width: 52px; height: 52px; }
+  .admin-table--products td.admin-cell-title { grid-column: 2; grid-row: 1; align-self: end; }
+  .admin-table--products td[data-label="Precio"] {
+    grid-column: 2; grid-row: 2; align-self: start; color: var(--ink-soft); font-size: 13.5px;
+  }
+  .admin-table--products td[data-label="Tallas"] {
+    grid-column: 1 / -1; grid-row: 3;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line-soft);
+  }
+  .admin-table--products td[data-label="Visible"] {
+    grid-column: 1; grid-row: 4;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  }
+  .admin-table--products td[data-label="Destacado"] {
+    grid-column: 2; grid-row: 4;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  }
+  .admin-table--products td.admin-cell-actions {
+    grid-column: 1 / -1; grid-row: 5;
+    display: flex;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line-soft);
+  }
+}
+
+/* ----- teléfono (≤640px): modal como bottom sheet ----- */
+@media (max-width: 640px) {
+  .admin-modal-scrim { align-items: flex-end; padding: 0; }
+  .admin-modal {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    max-height: 88dvh;
+    padding: var(--space-6) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+    animation: admin-sheet-in .28s cubic-bezier(.2, .8, .2, 1);
+  }
+  @keyframes admin-sheet-in {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+}
+@media (max-width: 640px) and (prefers-reduced-motion: reduce) {
+  .admin-modal { animation: none; }
+}
+@media (max-width: 480px) {
+  .admin-field-row { grid-template-columns: 1fr; }
+}
+
+/* ----- teléfono (≤640px): gráfico de pedidos, la columna de label
+   fija en 180px es demasiado ancha para 320-375px ----- */
+@media (max-width: 640px) {
+  .pedidos-bar-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "label label" "track count";
+    row-gap: 6px;
+  }
+  .pedidos-bar-label { grid-area: label; }
+  .pedidos-bar-track { grid-area: track; }
+  .pedidos-bar-count { grid-area: count; }
 }
