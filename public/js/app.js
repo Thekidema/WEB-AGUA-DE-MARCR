@@ -571,6 +571,13 @@ $('#checkout').addEventListener('click',()=>{
     let msg='¡Hola Agua de Mar! Me interesa este pedido:%0A%0A';
     items.forEach(i=>{const p=findProduct(i.id);msg+=`• ${i.qty}× ${p.type} ${p.color} (talla ${encodeURIComponent(i.size)}) — ${crc(p.price*i.qty)}%0A`;});
     msg+=`%0ASubtotal: ${crc(Cart.subtotal())}%0A%0A¿Me ayudan a coordinar pago y envío?`;
+    /* registro de intención de compra para el panel admin — nunca debe
+       bloquear ni romper el flujo real de checkout si falla */
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: items.map(i => ({ id: i.id, qty: i.qty })) }),
+    }).catch(() => {});
     window.open(`https://wa.me/${DM.WHATSAPP}?text=${msg}`,'_blank','noopener,noreferrer');
   } catch(err) {
     handleError('No se pudo preparar el mensaje de WhatsApp.', err);

@@ -72,4 +72,17 @@ if (faqCount === 0) {
   seedFaqs.forEach(([question, answer], i) => insertFaq.run(crypto.randomUUID(), question, answer, i));
 }
 
+/* pedidos por WhatsApp: NO son ventas confirmadas (el pago se coordina fuera
+   del sitio), son intención de compra al momento de tocar "Coordinar por
+   WhatsApp". items guarda un snapshot (id/type/color/price/qty) tomado en
+   ese momento, así el ranking sigue siendo válido aunque el producto se
+   edite o borre después. Sin datos personales del visitante. */
+db.exec(`
+  CREATE TABLE IF NOT EXISTS orders (
+    id         TEXT PRIMARY KEY,
+    items      TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+`);
+
 module.exports = db;

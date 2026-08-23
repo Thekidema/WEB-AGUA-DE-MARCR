@@ -468,3 +468,67 @@
   padding-top: var(--space-5);
   border-top: 1px solid var(--line-soft);
 }
+
+/* ===== Pedidos: gráfico de "productos más pedidos" ===== */
+.pedidos-chart-card { max-width: 640px; }
+
+.pedidos-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.pedidos-bar-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 32px;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pedidos-bar-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  color: var(--ink);
+  min-width: 0;
+}
+.pedidos-bar-label span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pedidos-bar-thumb {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--bg-2);
+}
+.pedidos-bar-thumb--empty { border: 1px dashed var(--line-strong); }
+
+.pedidos-bar-track {
+  height: 10px;
+  background: var(--bg);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.pedidos-bar-fill {
+  height: 100%;
+  min-width: 10px;
+  background: var(--green);
+  border-radius: 5px;
+  transition: width .4s var(--ease-out, ease-out);
+}
+
+.pedidos-bar-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: right;
+}

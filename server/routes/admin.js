@@ -212,4 +212,35 @@ router.delete('/faqs/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+/* ===== Pedidos por WhatsApp (intención de compra, no venta confirmada) ===== */
+router.get('/orders/stats', requireAdmin, (req, res) => {
+  const rows = db.prepare('SELECT items FROM orders').all();
+  const counts = new Map();
+
+  for (const row of rows) {
+    let items;
+    try { items = JSON.parse(row.items); } catch (e) { continue; }
+    const seenInThisOrder = new Set();
+    for (const item of items) {
+      if (!item?.id || seenInThisOrder.has(item.id)) continue; // "veces pedido" = # de pedidos distintos, no # de líneas
+      seenInThisOrder.add(item.id);
+      const existing = counts.get(item.id);
+      if (existing) existing.count += 1;
+      else counts.set(item.id, { id: item.id, type: item.type, color: item.color, count: 1 });
+    }
+  }
+
+  const ranked = [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 10);
+  const withImage = ranked.map((r) => {
+    const product = db.prepare('SELECT image FROM products WHERE id = ?').get(r.id);
+    return { ...r, image: product ? `/assets/images/products/${product.image}` : null };
+  });
+  res.json(withImage);
+});
+
+router.get('/orders', requireAdmin, (req, res) => {
+  const rows = db.prepare('SELECT id, items, created_at FROM orders ORDER BY created_at DESC LIMIT 50').all();
+  res.json(rows.map((r) => ({ id: r.id, items: JSON.parse(r.items), created_at: r.created_at })));
+});
+
 module.exports = router;

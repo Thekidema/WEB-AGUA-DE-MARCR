@@ -18,6 +18,7 @@
 
   <nav class="admin-tabs">
     <button type="button" class="admin-tab-btn active" data-tab="productos">Productos</button>
+    <button type="button" class="admin-tab-btn" data-tab="pedidos">Pedidos</button>
     <button type="button" class="admin-tab-btn" data-tab="faq">FAQ</button>
     <button type="button" class="admin-tab-btn" data-tab="config">Configuración</button>
   </nav>
@@ -45,6 +46,32 @@
           <tbody id="productsBody"></tbody>
         </table>
         <div id="emptyState" class="admin-empty" hidden>Todavía no hay productos. Agregá el primero.</div>
+      </div>
+    </section>
+
+    <section id="tab-pedidos" class="admin-tab-panel" hidden>
+      <div class="admin-toolbar">
+        <div class="admin-sub" style="margin:0">Pedidos coordinados por WhatsApp desde el sitio. No son ventas confirmadas — reflejan interés, el cierre se coordina por WhatsApp.</div>
+      </div>
+
+      <div class="admin-card admin-card-inline pedidos-chart-card">
+        <h2>Productos más pedidos</h2>
+        <div id="pedidosChart" class="pedidos-chart"></div>
+        <div id="pedidosChartEmpty" class="admin-empty" hidden>Todavía no hay pedidos registrados.</div>
+      </div>
+
+      <div class="admin-table-wrap" style="margin-top:var(--space-6)">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Pedido</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="pedidosBody"></tbody>
+        </table>
+        <div id="pedidosEmptyState" class="admin-empty" hidden>Todavía no hay pedidos registrados.</div>
       </div>
     </section>
 
@@ -203,5 +230,6 @@
   <script src="js/dashboard.js"></script>
   <script src="js/settings.js"></script>
   <script src="js/faqs.js"></script>
+  <script src="js/pedidos.js"></script>
 </body>
 </html>
