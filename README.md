@@ -54,7 +54,7 @@ Panel admin: http://localhost:3000/admin/login.html
 - El catálogo se administra 100% desde el panel — no hay productos de ejemplo, la base arranca vacía.
 - Las imágenes de producto subidas desde el panel se guardan en `public/assets/images/products/` (gitignored, contenido de la clienta).
 - CSP y demás headers de seguridad se configuran en `server/middleware/security.js` (antes vivían en `_headers` de Netlify y en un `<meta>` de `index.html`; ambos se eliminaron al migrar a un servidor Node real).
-- Para producción (Railway/Render): montar un volumen persistente y apuntar `DB_PATH`/`UPLOADS_DIR` ahí — de lo contrario la base de datos y las fotos se pierden en cada redeploy.
+- Producción (Railway): volumen persistente `web-agua-de-marcr-volume` montado en `/app/data`, con `DB_PATH=/app/data/aguademar.sqlite` y `UPLOADS_DIR=/app/data/products` — sin esto, la base de datos y las fotos se pierden en cada redeploy.
 
 ## Licencia
 
