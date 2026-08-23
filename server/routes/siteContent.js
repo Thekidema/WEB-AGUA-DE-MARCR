@@ -1,15 +1,15 @@
 const express = require('express');
-const db = require('../db');
+const { db } = require('../db');
 
 const router = express.Router();
 
 /* whitelist explícito de keys — nunca SELECT * FROM settings.
    Si se agregan faqs/testimonials más adelante, se suman acá como
    secciones propias, no como filas de settings. */
-router.get('/', (req, res) => {
-  const rows = db.prepare("SELECT key, value FROM settings WHERE key IN ('whatsapp', 'instagram')").all();
+router.get('/', async (req, res) => {
+  const rows = await db.all("SELECT key, value FROM settings WHERE key IN ('whatsapp', 'instagram')");
   const settings = Object.fromEntries(rows.map((r) => [r.key, r.value]));
-  const faqs = db.prepare('SELECT question, answer FROM faqs ORDER BY sort_order ASC, created_at ASC').all();
+  const faqs = await db.all('SELECT question, answer FROM faqs ORDER BY sort_order ASC, created_at ASC');
 
   res.json({
     whatsapp: settings.whatsapp || '',

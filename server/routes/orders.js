@@ -1,12 +1,12 @@
 const crypto = require('crypto');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
-const db = require('../db');
+const { db } = require('../db');
 
 const router = express.Router();
 
 /* endpoint público (lo llama cualquier visitante al hacer checkout) —
-   límite generoso para uso real, ajustado para frenar spam de datos falsos */
+   límite generoso para uso real, ajustado para frenar spam de datos falsas */
 const ordersLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
@@ -15,7 +15,7 @@ const ordersLimiter = rateLimit({
   message: { error: 'Demasiados pedidos seguidos. Probá de nuevo en unos minutos.' },
 });
 
-router.post('/', ordersLimiter, express.json(), (req, res) => {
+router.post('/', ordersLimiter, express.json(), async (req, res) => {
   const rawItems = Array.isArray(req.body?.items) ? req.body.items : [];
   if (!rawItems.length) return res.status(400).json({ error: 'items no puede estar vacío' });
 
@@ -25,13 +25,13 @@ router.post('/', ordersLimiter, express.json(), (req, res) => {
   for (const raw of rawItems) {
     const qty = Number.isInteger(raw?.qty) && raw.qty > 0 && raw.qty < 1000 ? raw.qty : null;
     if (!raw?.id || !qty) continue;
-    const product = db.prepare('SELECT id, type, color, price FROM products WHERE id = ?').get(raw.id);
+    const product = await db.get('SELECT id, type, color, price FROM products WHERE id = ?', raw.id);
     if (!product) continue;
     snapshot.push({ id: product.id, type: product.type, color: product.color, price: product.price, qty });
   }
   if (!snapshot.length) return res.status(400).json({ error: 'Ningún producto válido en items' });
 
-  db.prepare('INSERT INTO orders (id, items) VALUES (?, ?)').run(crypto.randomUUID(), JSON.stringify(snapshot));
+  await db.run('INSERT INTO orders (id, items) VALUES (?, ?)', crypto.randomUUID(), JSON.stringify(snapshot));
   res.status(201).json({ ok: true });
 });
 

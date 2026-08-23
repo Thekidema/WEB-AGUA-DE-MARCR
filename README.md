@@ -1,6 +1,6 @@
 # Agua de Mar · Beachwear Costa Rica
 
-Sitio web con panel de administrador para la marca de trajes de baño hechos a mano en Costa Rica. Backend Node.js + Express + SQLite; el sitio público y el panel admin son HTML/JS vanilla (sin build step).
+Sitio web con panel de administrador para la marca de trajes de baño hechos a mano en Costa Rica. Backend Node.js + Express + SQLite (local en dev, [Turso](https://turso.tech) gestionado en la nube en producción); el sitio público y el panel admin son HTML/JS vanilla (sin build step).
 
 ## Estructura del proyecto
 
@@ -11,7 +11,7 @@ Sitio web con panel de administrador para la marca de trajes de baño hechos a m
 ├── data/                        # aguademar.sqlite (gitignored)
 ├── server/
 │   ├── index.js                 # Express: helmet, static, rutas, listen
-│   ├── db.js                    # better-sqlite3, crea la tabla al arrancar
+│   ├── db.js                    # @libsql/client: archivo local (dev) o Turso (prod)
 │   ├── upload.js                # multer: subida de imágenes de producto
 │   ├── productSerializer.js
 │   ├── middleware/
@@ -54,7 +54,8 @@ Panel admin: http://localhost:3000/admin/login.html
 - El catálogo se administra 100% desde el panel — no hay productos de ejemplo, la base arranca vacía.
 - Las imágenes de producto subidas desde el panel se guardan en `public/assets/images/products/` (gitignored, contenido de la clienta).
 - CSP y demás headers de seguridad se configuran en `server/middleware/security.js` (antes vivían en `_headers` de Netlify y en un `<meta>` de `index.html`; ambos se eliminaron al migrar a un servidor Node real).
-- Producción (Railway): volumen persistente `web-agua-de-marcr-volume` montado en `/app/data`, con `DB_PATH=/app/data/aguademar.sqlite` y `UPLOADS_DIR=/app/data/products` — sin esto, la base de datos y las fotos se pierden en cada redeploy.
+- Base de datos: sin `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` seteados, usa un archivo SQLite local (`DB_PATH`) — así funciona `npm run dev` sin depender de la nube. En producción (Railway) esas dos variables apuntan a la base gestionada en Turso, con backups y persistencia real (no depende del volumen ni se pierde en cada redeploy).
+- Producción (Railway): volumen persistente `web-agua-de-marcr-volume` montado en `/app/data`, usado solo para `UPLOADS_DIR` (fotos de producto) — la base de datos ya no vive ahí, vive en Turso.
 
 ## Licencia
 

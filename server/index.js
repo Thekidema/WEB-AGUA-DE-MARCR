@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const { helmetMiddleware, permissionsPolicy } = require('./middleware/security');
+const { initDb } = require('./db');
 const productsRouter = require('./routes/products');
 const adminRouter = require('./routes/admin');
 const siteContentRouter = require('./routes/siteContent');
@@ -26,6 +27,13 @@ app.use('/assets/images/products', express.static(UPLOADS_DIR));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Agua de Mar corriendo en http://localhost:${PORT}`);
-});
+initDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Agua de Mar corriendo en http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('No se pudo inicializar la base de datos:', err);
+    process.exit(1);
+  });

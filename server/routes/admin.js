@@ -3,7 +3,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { COOKIE_NAME, signAdminToken, cookieOptions, requireAdmin } = require('../middleware/auth');
-const db = require('../db');
+const { db } = require('../db');
 const { serializeProduct } = require('../productSerializer');
 const { upload, deleteUploadedImage } = require('../upload');
 
@@ -72,12 +72,12 @@ router.get('/session', requireAdmin, (req, res) => {
   res.json({ username: req.admin.sub });
 });
 
-router.get('/products', requireAdmin, (req, res) => {
-  const rows = db.prepare('SELECT * FROM products ORDER BY created_at DESC').all();
+router.get('/products', requireAdmin, async (req, res) => {
+  const rows = await db.all('SELECT * FROM products ORDER BY created_at DESC');
   res.json(rows.map(serializeProduct));
 });
 
-router.post('/products', requireAdmin, handleImageUpload, (req, res) => {
+router.post('/products', requireAdmin, handleImageUpload, async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'La imagen es requerida' });
 
   const { errors, type, color, tone, desc, price, sizes } = validateProductFields(req.body);
@@ -87,16 +87,17 @@ router.post('/products', requireAdmin, handleImageUpload, (req, res) => {
   }
 
   const id = crypto.randomUUID();
-  db.prepare(
-    `INSERT INTO products (id, type, color, price, sizes, tone, desc, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(id, type, color, price, JSON.stringify(sizes), tone, desc, req.file.filename);
+  await db.run(
+    `INSERT INTO products (id, type, color, price, sizes, tone, desc, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    id, type, color, price, JSON.stringify(sizes), tone, desc, req.file.filename
+  );
 
-  const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  const row = await db.get('SELECT * FROM products WHERE id = ?', id);
   res.status(201).json(serializeProduct(row));
 });
 
-router.put('/products/:id', requireAdmin, handleImageUpload, (req, res) => {
-  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+router.put('/products/:id', requireAdmin, handleImageUpload, async (req, res) => {
+  const existing = await db.get('SELECT * FROM products WHERE id = ?', req.params.id);
   if (!existing) {
     if (req.file) deleteUploadedImage(req.file.filename);
     return res.status(404).json({ error: 'Producto no encontrado' });
@@ -109,34 +110,35 @@ router.put('/products/:id', requireAdmin, handleImageUpload, (req, res) => {
   }
 
   const image = req.file ? req.file.filename : existing.image;
-  db.prepare(
-    `UPDATE products SET type=?, color=?, price=?, sizes=?, tone=?, desc=?, image=? WHERE id=?`
-  ).run(type, color, price, JSON.stringify(sizes), tone, desc, image, req.params.id);
+  await db.run(
+    `UPDATE products SET type=?, color=?, price=?, sizes=?, tone=?, desc=?, image=? WHERE id=?`,
+    type, color, price, JSON.stringify(sizes), tone, desc, image, req.params.id
+  );
 
   if (req.file) deleteUploadedImage(existing.image);
 
-  const row = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  const row = await db.get('SELECT * FROM products WHERE id = ?', req.params.id);
   res.json(serializeProduct(row));
 });
 
-router.delete('/products/:id', requireAdmin, (req, res) => {
-  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+router.delete('/products/:id', requireAdmin, async (req, res) => {
+  const existing = await db.get('SELECT * FROM products WHERE id = ?', req.params.id);
   if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
 
-  db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
+  await db.run('DELETE FROM products WHERE id = ?', req.params.id);
   deleteUploadedImage(existing.image);
   res.json({ ok: true });
 });
 
 function togglePatch(column) {
-  return (req, res) => {
-    const existing = db.prepare('SELECT id FROM products WHERE id = ?').get(req.params.id);
+  return async (req, res) => {
+    const existing = await db.get('SELECT id FROM products WHERE id = ?', req.params.id);
     if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
     if (typeof req.body.value !== 'boolean') {
       return res.status(400).json({ error: 'value debe ser boolean' });
     }
-    db.prepare(`UPDATE products SET ${column} = ? WHERE id = ?`).run(req.body.value ? 1 : 0, req.params.id);
-    const row = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+    await db.run(`UPDATE products SET ${column} = ? WHERE id = ?`, req.body.value ? 1 : 0, req.params.id);
+    const row = await db.get('SELECT * FROM products WHERE id = ?', req.params.id);
     res.json(serializeProduct(row));
   };
 }
@@ -145,13 +147,13 @@ router.patch('/products/:id/active', requireAdmin, express.json(), togglePatch('
 router.patch('/products/:id/featured', requireAdmin, express.json(), togglePatch('featured'));
 
 /* ===== Configuración pública (WhatsApp / Instagram) ===== */
-router.get('/settings', requireAdmin, (req, res) => {
-  const rows = db.prepare("SELECT key, value FROM settings WHERE key IN ('whatsapp', 'instagram')").all();
+router.get('/settings', requireAdmin, async (req, res) => {
+  const rows = await db.all("SELECT key, value FROM settings WHERE key IN ('whatsapp', 'instagram')");
   const settings = Object.fromEntries(rows.map((r) => [r.key, r.value]));
   res.json({ whatsapp: settings.whatsapp || '', instagram: settings.instagram || '' });
 });
 
-router.put('/settings', requireAdmin, express.json(), (req, res) => {
+router.put('/settings', requireAdmin, express.json(), async (req, res) => {
   const { whatsapp, instagram } = req.body || {};
   const errors = [];
 
@@ -163,15 +165,15 @@ router.put('/settings', requireAdmin, express.json(), (req, res) => {
   }
   if (errors.length) return res.status(400).json({ error: errors.join(', ') });
 
-  const upsert = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
-  upsert.run('whatsapp', whatsapp);
-  upsert.run('instagram', instagram);
+  const upsertSql = 'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value';
+  await db.run(upsertSql, 'whatsapp', whatsapp);
+  await db.run(upsertSql, 'instagram', instagram);
   res.json({ whatsapp, instagram });
 });
 
 /* ===== FAQ ===== */
-router.get('/faqs', requireAdmin, (req, res) => {
-  const rows = db.prepare('SELECT * FROM faqs ORDER BY sort_order ASC, created_at ASC').all();
+router.get('/faqs', requireAdmin, async (req, res) => {
+  const rows = await db.all('SELECT * FROM faqs ORDER BY sort_order ASC, created_at ASC');
   res.json(rows);
 });
 
@@ -185,36 +187,36 @@ function validateFaqFields(body) {
   return { errors, question, answer, sortOrder };
 }
 
-router.post('/faqs', requireAdmin, express.json(), (req, res) => {
+router.post('/faqs', requireAdmin, express.json(), async (req, res) => {
   const { errors, question, answer, sortOrder } = validateFaqFields(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(', ') });
 
   const id = crypto.randomUUID();
-  db.prepare('INSERT INTO faqs (id, question, answer, sort_order) VALUES (?, ?, ?, ?)').run(id, question, answer, sortOrder);
-  res.status(201).json(db.prepare('SELECT * FROM faqs WHERE id = ?').get(id));
+  await db.run('INSERT INTO faqs (id, question, answer, sort_order) VALUES (?, ?, ?, ?)', id, question, answer, sortOrder);
+  res.status(201).json(await db.get('SELECT * FROM faqs WHERE id = ?', id));
 });
 
-router.put('/faqs/:id', requireAdmin, express.json(), (req, res) => {
-  const existing = db.prepare('SELECT id FROM faqs WHERE id = ?').get(req.params.id);
+router.put('/faqs/:id', requireAdmin, express.json(), async (req, res) => {
+  const existing = await db.get('SELECT id FROM faqs WHERE id = ?', req.params.id);
   if (!existing) return res.status(404).json({ error: 'FAQ no encontrada' });
 
   const { errors, question, answer, sortOrder } = validateFaqFields(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(', ') });
 
-  db.prepare('UPDATE faqs SET question=?, answer=?, sort_order=? WHERE id=?').run(question, answer, sortOrder, req.params.id);
-  res.json(db.prepare('SELECT * FROM faqs WHERE id = ?').get(req.params.id));
+  await db.run('UPDATE faqs SET question=?, answer=?, sort_order=? WHERE id=?', question, answer, sortOrder, req.params.id);
+  res.json(await db.get('SELECT * FROM faqs WHERE id = ?', req.params.id));
 });
 
-router.delete('/faqs/:id', requireAdmin, (req, res) => {
-  const existing = db.prepare('SELECT id FROM faqs WHERE id = ?').get(req.params.id);
+router.delete('/faqs/:id', requireAdmin, async (req, res) => {
+  const existing = await db.get('SELECT id FROM faqs WHERE id = ?', req.params.id);
   if (!existing) return res.status(404).json({ error: 'FAQ no encontrada' });
-  db.prepare('DELETE FROM faqs WHERE id = ?').run(req.params.id);
+  await db.run('DELETE FROM faqs WHERE id = ?', req.params.id);
   res.json({ ok: true });
 });
 
 /* ===== Pedidos por WhatsApp (intención de compra, no venta confirmada) ===== */
-router.get('/orders/stats', requireAdmin, (req, res) => {
-  const rows = db.prepare('SELECT items FROM orders').all();
+router.get('/orders/stats', requireAdmin, async (req, res) => {
+  const rows = await db.all('SELECT items FROM orders');
   const counts = new Map();
 
   for (const row of rows) {
@@ -231,15 +233,16 @@ router.get('/orders/stats', requireAdmin, (req, res) => {
   }
 
   const ranked = [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 10);
-  const withImage = ranked.map((r) => {
-    const product = db.prepare('SELECT image FROM products WHERE id = ?').get(r.id);
-    return { ...r, image: product ? `/assets/images/products/${product.image}` : null };
-  });
+  const withImage = [];
+  for (const r of ranked) {
+    const product = await db.get('SELECT image FROM products WHERE id = ?', r.id);
+    withImage.push({ ...r, image: product ? `/assets/images/products/${product.image}` : null });
+  }
   res.json(withImage);
 });
 
-router.get('/orders', requireAdmin, (req, res) => {
-  const rows = db.prepare('SELECT id, items, created_at FROM orders ORDER BY created_at DESC LIMIT 50').all();
+router.get('/orders', requireAdmin, async (req, res) => {
+  const rows = await db.all('SELECT id, items, created_at FROM orders ORDER BY created_at DESC LIMIT 50');
   res.json(rows.map((r) => ({ id: r.id, items: JSON.parse(r.items), created_at: r.created_at })));
 });
 
