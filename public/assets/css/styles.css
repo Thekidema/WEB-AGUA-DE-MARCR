@@ -1362,18 +1362,23 @@ footer .brand-word { color: #fff; font-size: 22px; letter-spacing: .18em; }
   .sec-head                   { margin-bottom: 38px; }
   .masonry                    { grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .modal                      { padding: 12px; }
-  .modal .panel               { 
-    grid-template-columns: 1fr; 
-    max-height: 94dvh; 
+  .modal .panel               {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    max-height: 94dvh;
     border-radius: var(--radius-lg);
   }
-  .modal .pimg                { 
-    min-height: 240px; 
-    max-height: 38dvh; 
+  .modal .pimg                {
+    min-height: 240px;
+    max-height: 38dvh;
     border-right: none;
     border-bottom: 1px solid rgba(42,42,42,0.06);
   }
-  .modal .pinfo               { padding: 28px 24px 32px; overflow: visible; }
+  /* fila de info limitada a minmax(0,1fr) arriba + overflow-y:auto acá:
+     sin esto, el grid deja crecer .pinfo a su alto natural, empuja el
+     panel más allá de max-height, y .panel (overflow:hidden) recorta lo
+     que sobra — tallas y "Agregar al carrito" quedaban invisibles */
+  .modal .pinfo               { padding: 28px 24px 32px; overflow-y: auto; }
   .featured                   { grid-template-columns: 1fr; }
   .featured .feat:first-child { grid-column: auto; }
   .fab-stack                  { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); gap: 12px; }
