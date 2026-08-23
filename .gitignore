@@ -17,5 +17,3 @@ data/*.sqlite
 data/*.sqlite-*
 public/assets/images/products/*
 !public/assets/images/products/.gitkeep
-public/assets/images/testimonials/*
-!public/assets/images/testimonials/.gitkeep
