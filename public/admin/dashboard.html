@@ -18,6 +18,7 @@
 
   <nav class="admin-tabs">
     <button type="button" class="admin-tab-btn active" data-tab="productos">Productos</button>
+    <button type="button" class="admin-tab-btn" data-tab="clientas">Clientas</button>
     <button type="button" class="admin-tab-btn" data-tab="faq">FAQ</button>
     <button type="button" class="admin-tab-btn" data-tab="config">Configuración</button>
   </nav>
@@ -45,6 +46,27 @@
           <tbody id="productsBody"></tbody>
         </table>
         <div id="emptyState" class="admin-empty" hidden>Todavía no hay productos. Agregá el primero.</div>
+      </div>
+    </section>
+
+    <section id="tab-clientas" class="admin-tab-panel" hidden>
+      <div class="admin-toolbar">
+        <div class="admin-sub" style="margin:0">Fotos del carrusel "Nuestras clientas" en la página principal.</div>
+        <button type="button" class="btn btn-solid" id="newTestimonialBtn">+ Agregar foto</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Orden</th>
+              <th>Texto alternativo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="testimonialsBody"></tbody>
+        </table>
+        <div id="testimonialsEmptyState" class="admin-empty" hidden>Todavía no hay fotos. Agregá la primera.</div>
       </div>
     </section>
 
@@ -190,6 +212,42 @@
     </div>
   </div>
 
+  <div class="admin-modal-scrim" id="testimonialModalScrim">
+    <div class="admin-modal">
+      <div class="admin-modal-head">
+        <h2 id="testimonialModalTitle">Agregar foto</h2>
+      </div>
+      <form id="testimonialForm">
+        <input type="hidden" name="id">
+        <div class="admin-field">
+          <label for="testimonialImageInput">Foto</label>
+          <div class="admin-upload">
+            <img id="testimonialCurrentImage" class="admin-current-image" hidden alt="Foto actual">
+            <div class="admin-upload-body">
+              <label class="admin-upload-btn" for="testimonialImageInput">Elegir archivo</label>
+              <input type="file" name="image" id="testimonialImageInput" accept="image/jpeg,image/png,image/webp" class="admin-upload-input">
+              <span class="admin-upload-name" id="testimonialFileName">Ningún archivo elegido</span>
+              <span class="admin-upload-hint">JPEG, PNG o WebP · máx. 8MB</span>
+            </div>
+          </div>
+          <p class="admin-sub admin-field-hint" id="testimonialImageHint" hidden>Dejá el campo vacío para conservar la foto actual.</p>
+        </div>
+        <div class="admin-field">
+          <label for="testimonialAltInput">Texto alternativo (accesibilidad)</label>
+          <input type="text" id="testimonialAltInput" name="alt" placeholder="Clienta real usando traje de baño de Agua de Mar">
+        </div>
+        <div class="admin-field">
+          <label for="testimonialOrderInput">Orden</label>
+          <input type="number" id="testimonialOrderInput" name="sort_order" value="0" min="0" step="1">
+        </div>
+        <div class="admin-modal-actions">
+          <button type="button" class="btn btn-ghost" id="testimonialCancelBtn">Cancelar</button>
+          <button type="submit" class="btn btn-solid">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="toast" id="toast">
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M5 12l5 5L20 7" />
@@ -203,5 +261,6 @@
   <script src="js/dashboard.js"></script>
   <script src="js/settings.js"></script>
   <script src="js/faqs.js"></script>
+  <script src="js/testimonials.js"></script>
 </body>
 </html>

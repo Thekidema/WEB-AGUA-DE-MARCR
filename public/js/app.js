@@ -237,15 +237,9 @@ function renderFeatured(){
 }
 
 /* =================== CARRUSEL 3D (CLIENTAS) =================== */
-const carouselSlides = [
-  { src: 'assets/images/clientas/modelo-1.jpg', alt: 'Clienta real usando traje de baño de Agua de Mar' },
-  { src: 'assets/images/clientas/modelo-2.jpg', alt: 'Clienta real usando traje de baño de Agua de Mar' },
-  { src: 'assets/images/clientas/modelo-3.jpg', alt: 'Clienta real usando traje de baño de Agua de Mar' },
-];
-
-
-
-let carouselIndex = Math.floor(carouselSlides.length / 2);
+/* se puebla en init() desde DM.testimonials (fetched vía /api/site-content) */
+let carouselSlides = [];
+let carouselIndex = 0;
 let carouselTimer = null;
 
 function renderCarousel() {
@@ -654,9 +648,13 @@ async function init(){
     DM.WHATSAPP = siteContentResult.value.whatsapp || DM.WHATSAPP;
     DM.INSTAGRAM = siteContentResult.value.instagram || DM.INSTAGRAM;
     DM.faqs = siteContentResult.value.faqs || DM.faqs;
+    DM.testimonials = siteContentResult.value.testimonials || DM.testimonials;
   } else {
     console.warn('[AguaDeMar] No se pudo cargar la configuración del sitio, usando valores por defecto.', siteContentResult.reason);
   }
+
+  carouselSlides = DM.testimonials.map(t => ({ src: t.image, alt: t.alt }));
+  carouselIndex = Math.floor(carouselSlides.length / 2);
 
   try {
     Cart.load();

@@ -5,7 +5,7 @@ const rateLimit = require('express-rate-limit');
 const { COOKIE_NAME, signAdminToken, cookieOptions, requireAdmin } = require('../middleware/auth');
 const db = require('../db');
 const { serializeProduct } = require('../productSerializer');
-const { upload, deleteUploadedImage } = require('../upload');
+const { upload, deleteUploadedImage, testimonials: testimonialsUpload } = require('../upload');
 
 const router = express.Router();
 
@@ -209,6 +209,63 @@ router.delete('/faqs/:id', requireAdmin, (req, res) => {
   const existing = db.prepare('SELECT id FROM faqs WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'FAQ no encontrada' });
   db.prepare('DELETE FROM faqs WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+/* ===== Clientas / testimonios ===== */
+function handleTestimonialUpload(req, res, next) {
+  testimonialsUpload.upload.single('image')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message || 'Error al subir la imagen' });
+    next();
+  });
+}
+
+function serializeTestimonial(row) {
+  return {
+    id: row.id,
+    image: `/assets/images/testimonials/${row.image}`,
+    alt: row.alt,
+    sort_order: row.sort_order,
+  };
+}
+
+router.get('/testimonials', requireAdmin, (req, res) => {
+  const rows = db.prepare('SELECT * FROM testimonials ORDER BY sort_order ASC, created_at ASC').all();
+  res.json(rows.map(serializeTestimonial));
+});
+
+router.post('/testimonials', requireAdmin, handleTestimonialUpload, (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'La imagen es requerida' });
+  const alt = (req.body.alt || '').trim() || 'Clienta real usando traje de baño de Agua de Mar';
+  const sortOrder = Number.isInteger(Number(req.body.sort_order)) ? Number(req.body.sort_order) : 0;
+
+  const id = crypto.randomUUID();
+  db.prepare('INSERT INTO testimonials (id, image, alt, sort_order) VALUES (?, ?, ?, ?)').run(id, req.file.filename, alt, sortOrder);
+  res.status(201).json(serializeTestimonial(db.prepare('SELECT * FROM testimonials WHERE id = ?').get(id)));
+});
+
+router.put('/testimonials/:id', requireAdmin, handleTestimonialUpload, (req, res) => {
+  const existing = db.prepare('SELECT * FROM testimonials WHERE id = ?').get(req.params.id);
+  if (!existing) {
+    if (req.file) testimonialsUpload.deleteUploadedImage(req.file.filename);
+    return res.status(404).json({ error: 'Testimonio no encontrado' });
+  }
+
+  const alt = (req.body.alt || '').trim() || 'Clienta real usando traje de baño de Agua de Mar';
+  const sortOrder = Number.isInteger(Number(req.body.sort_order)) ? Number(req.body.sort_order) : 0;
+  const image = req.file ? req.file.filename : existing.image;
+
+  db.prepare('UPDATE testimonials SET image=?, alt=?, sort_order=? WHERE id=?').run(image, alt, sortOrder, req.params.id);
+  if (req.file) testimonialsUpload.deleteUploadedImage(existing.image);
+
+  res.json(serializeTestimonial(db.prepare('SELECT * FROM testimonials WHERE id = ?').get(req.params.id)));
+});
+
+router.delete('/testimonials/:id', requireAdmin, (req, res) => {
+  const existing = db.prepare('SELECT * FROM testimonials WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Testimonio no encontrado' });
+  db.prepare('DELETE FROM testimonials WHERE id = ?').run(req.params.id);
+  testimonialsUpload.deleteUploadedImage(existing.image);
   res.json({ ok: true });
 });
 

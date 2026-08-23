@@ -39,10 +39,6 @@ AguaDeMar.data = {
   ],
 
   products: [],
-  clientas: [
-    { who: 'Mariana R.', loc: 'Puntarenas', tone: '#E7DECF' },
-    { who: 'Valeria C.', loc: 'Guanacaste', tone: '#E2E7E1' },
-    { who: 'Daniela M.', loc: 'Limón', tone: '#EAE0D0' },
-  ],
   faqs: [], // se puebla vía fetch('/api/site-content') en app.js
+  testimonials: [], // ídem — fotos del carrusel de clientas
 };

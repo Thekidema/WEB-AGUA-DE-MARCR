@@ -72,4 +72,32 @@ if (faqCount === 0) {
   seedFaqs.forEach(([question, answer], i) => insertFaq.run(crypto.randomUUID(), question, answer, i));
 }
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS testimonials (
+    id         TEXT PRIMARY KEY,
+    image      TEXT NOT NULL,
+    alt        TEXT NOT NULL DEFAULT 'Clienta real usando traje de baño de Agua de Mar',
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+`);
+
+/* bootstrap con las 3 fotos de clientas que ya vivían hardcoded en app.js
+   (assets/images/clientas/modelo-N.jpg) — se copian al directorio de
+   subidas de testimonios para que el carrusel siga usando el mismo
+   patrón "solo filename + prefijo fijo" que products, sin caso especial */
+const testimonialCount = db.prepare('SELECT COUNT(*) AS n FROM testimonials').get().n;
+if (testimonialCount === 0) {
+  const { testimonials: testimonialsUpload } = require('./upload');
+  const sourceDir = path.join(__dirname, '..', 'public', 'assets', 'images', 'clientas');
+  const insertTestimonial = db.prepare('INSERT INTO testimonials (id, image, sort_order) VALUES (?, ?, ?)');
+  ['modelo-1.jpg', 'modelo-2.jpg', 'modelo-3.jpg'].forEach((filename, i) => {
+    const src = path.join(sourceDir, filename);
+    if (!fs.existsSync(src)) return;
+    const destFilename = crypto.randomUUID() + '.jpg';
+    fs.copyFileSync(src, path.join(testimonialsUpload.UPLOADS_DIR, destFilename));
+    insertTestimonial.run(crypto.randomUUID(), destFilename, i);
+  });
+}
+
 module.exports = db;
