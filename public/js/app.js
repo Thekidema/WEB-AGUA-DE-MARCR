@@ -577,9 +577,6 @@ $('#checkout').addEventListener('click',()=>{
   }
 });
 
-$$('[data-wa-link]').forEach(a=>a.href=`https://wa.me/${DM.WHATSAPP}`);
-$$('[data-ig-link]').forEach(a=>a.href=DM.INSTAGRAM);
-
 $('#news').addEventListener('submit',e=>{
   e.preventDefault();
   const form = e.target;
@@ -641,13 +638,23 @@ function observeReveals(){
 
 /* =================== INIT =================== */
 async function init(){
-  try {
-    const res = await fetch('/api/products');
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    DM.products = await res.json();
-  } catch(err) {
-    handleError('No se pudo cargar el catálogo. Intenta de nuevo más tarde.', err);
+  const [productsResult, siteContentResult] = await Promise.allSettled([
+    fetch('/api/products').then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+    fetch('/api/site-content').then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+  ]);
+
+  if (productsResult.status === 'fulfilled') {
+    DM.products = productsResult.value;
+  } else {
+    handleError('No se pudo cargar el catálogo. Intenta de nuevo más tarde.', productsResult.reason);
     DM.products = [];
+  }
+
+  if (siteContentResult.status === 'fulfilled') {
+    DM.WHATSAPP = siteContentResult.value.whatsapp || DM.WHATSAPP;
+    DM.INSTAGRAM = siteContentResult.value.instagram || DM.INSTAGRAM;
+  } else {
+    console.warn('[AguaDeMar] No se pudo cargar la configuración del sitio, usando valores por defecto.', siteContentResult.reason);
   }
 
   try {
@@ -660,6 +667,8 @@ async function init(){
     updateCount();
     renderCart();
     observeReveals();
+    $$('[data-wa-link]').forEach(a=>a.href=`https://wa.me/${DM.WHATSAPP}`);
+    $$('[data-ig-link]').forEach(a=>a.href=DM.INSTAGRAM);
     if(typeof lucide!=='undefined') lucide.createIcons();
 
     if(window.location.hash && window.location.hash.startsWith('#producto-')){

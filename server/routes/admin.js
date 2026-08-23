@@ -144,4 +144,29 @@ function togglePatch(column) {
 router.patch('/products/:id/active', requireAdmin, express.json(), togglePatch('active'));
 router.patch('/products/:id/featured', requireAdmin, express.json(), togglePatch('featured'));
 
+/* ===== Configuración pública (WhatsApp / Instagram) ===== */
+router.get('/settings', requireAdmin, (req, res) => {
+  const rows = db.prepare("SELECT key, value FROM settings WHERE key IN ('whatsapp', 'instagram')").all();
+  const settings = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  res.json({ whatsapp: settings.whatsapp || '', instagram: settings.instagram || '' });
+});
+
+router.put('/settings', requireAdmin, express.json(), (req, res) => {
+  const { whatsapp, instagram } = req.body || {};
+  const errors = [];
+
+  if (!/^\d{8,15}$/.test(whatsapp || '')) {
+    errors.push('WhatsApp debe ser solo dígitos (código de país + número, sin +, espacios ni guiones)');
+  }
+  if (!/^https:\/\/(www\.)?instagram\.com\/.+/.test(instagram || '')) {
+    errors.push('Instagram debe ser una URL de instagram.com (ej. https://www.instagram.com/tuusuario)');
+  }
+  if (errors.length) return res.status(400).json({ error: errors.join(', ') });
+
+  const upsert = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
+  upsert.run('whatsapp', whatsapp);
+  upsert.run('instagram', instagram);
+  res.json({ whatsapp, instagram });
+});
+
 module.exports = router;

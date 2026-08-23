@@ -32,4 +32,18 @@ if (!productCols.includes('featured')) {
   db.exec('ALTER TABLE products ADD COLUMN featured INTEGER NOT NULL DEFAULT 0');
 }
 
+/* settings: SOLO contenido público (whatsapp/instagram). Nunca mezclar acá
+   credenciales — el endpoint público /api/site-content hace SELECT por key
+   explícito, y si esta tabla algún día tuviera datos sensibles, un simple
+   error de copy/paste podría filtrarlos. Ver server/routes/adminCredentials
+   (Fase B2) para dónde vive la contraseña del admin. */
+db.exec(`
+  CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+`);
+db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)').run('whatsapp', '50683425634');
+db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)').run('instagram', 'https://www.instagram.com/aguademarbeachwearcr');
+
 module.exports = db;

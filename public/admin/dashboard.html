@@ -16,29 +16,57 @@
     <button type="button" class="btn btn-ghost" id="logoutBtn">Cerrar sesión</button>
   </header>
 
-  <main class="admin-main">
-    <div class="admin-toolbar">
-      <div id="whoami" class="admin-sub" style="margin:0"></div>
-      <button type="button" class="btn btn-solid" id="newProductBtn">+ Agregar producto</button>
-    </div>
+  <nav class="admin-tabs">
+    <button type="button" class="admin-tab-btn active" data-tab="productos">Productos</button>
+    <button type="button" class="admin-tab-btn" data-tab="config">Configuración</button>
+  </nav>
 
-    <div class="admin-table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Prenda</th>
-            <th>Precio</th>
-            <th>Tallas</th>
-            <th>Visible</th>
-            <th>Destacado</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="productsBody"></tbody>
-      </table>
-      <div id="emptyState" class="admin-empty" hidden>Todavía no hay productos. Agregá el primero.</div>
-    </div>
+  <main class="admin-main">
+    <section id="tab-productos" class="admin-tab-panel">
+      <div class="admin-toolbar">
+        <div id="whoami" class="admin-sub" style="margin:0"></div>
+        <button type="button" class="btn btn-solid" id="newProductBtn">+ Agregar producto</button>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Prenda</th>
+              <th>Precio</th>
+              <th>Tallas</th>
+              <th>Visible</th>
+              <th>Destacado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="productsBody"></tbody>
+        </table>
+        <div id="emptyState" class="admin-empty" hidden>Todavía no hay productos. Agregá el primero.</div>
+      </div>
+    </section>
+
+    <section id="tab-config" class="admin-tab-panel" hidden>
+      <div class="admin-card admin-card-inline">
+        <h2>Contacto del sitio</h2>
+        <p class="admin-sub">Se usan en el botón flotante de WhatsApp, el link de Instagram y el mensaje de checkout.</p>
+        <form id="settingsForm">
+          <div class="admin-field">
+            <label for="whatsappInput">WhatsApp</label>
+            <input type="text" id="whatsappInput" name="whatsapp" placeholder="50683425634" autocomplete="off">
+            <p class="admin-sub admin-field-hint">Solo dígitos: código de país + número, sin +, espacios ni guiones.</p>
+          </div>
+          <div class="admin-field">
+            <label for="instagramInput">Instagram</label>
+            <input type="text" id="instagramInput" name="instagram" placeholder="https://www.instagram.com/tuusuario" autocomplete="off">
+          </div>
+          <div class="admin-modal-actions" style="justify-content:flex-start; border-top:none; padding-top:0; margin-top:var(--space-5)">
+            <button type="submit" class="btn btn-solid">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </section>
   </main>
 
   <div class="admin-modal-scrim" id="modalScrim">
@@ -122,6 +150,8 @@
 
   <script src="/js/data.js"></script>
   <script src="js/admin-common.js"></script>
+  <script src="js/tabs.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/settings.js"></script>
 </body>
 </html>
